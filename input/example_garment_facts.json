@@ -1,0 +1,22 @@
+{
+  "analysis_mode": "light",
+  "garment": {
+    "category": "t-shirt",
+    "color_hex": "#FF5733",
+    "color_name": "orange",
+    "fabric": "cotton",
+    "silhouette": "relaxed",
+    "finish": "matte",
+    "pockets_count": 0,
+    "pattern": "solid",
+    "transparency_level": 0.0,
+    "complexity_score": 0.3
+  },
+  "photography": {
+    "bg": "pure_white",
+    "lighting": "soft_even_high_key",
+    "frame": "4:5",
+    "coverage_pct": 85
+  },
+  "risk_score": 0.2
+}
