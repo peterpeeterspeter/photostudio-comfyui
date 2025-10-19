@@ -1,0 +1,63 @@
+{
+  "core_contract": {
+    "mandatory_specs": {
+      "background": {
+        "color": "#FFFFFF",
+        "type": "solid",
+        "edge_treatment": "clean alpha"
+      },
+      "silhouette": {
+        "garment_type": "dress",
+        "fit": "natural",
+        "symmetry": "bilateral"
+      },
+      "interior_rendering": {
+        "neckline_visible": true,
+        "cuff_visible": true,
+        "hem_visible": false
+      },
+      "color_accuracy": {
+        "primary_hex": "#1a237e",
+        "delta_e_max": 2.0
+      },
+      "resolution": {
+        "min_width": 2048,
+        "min_height": 2048
+      }
+    },
+    "forbidden_elements": [
+      "visible mannequin",
+      "background patterns",
+      "harsh shadows",
+      "color distortion"
+    ]
+  },
+  "rendering_hints": {
+    "lighting": {
+      "setup": "three-point studio",
+      "key_light": "soft 45-degree",
+      "shadows": "soft contact only"
+    },
+    "fabric_behavior": {
+      "material_type": "cotton",
+      "drape_weight": "natural",
+      "texture_visibility": "clear"
+    },
+    "critical_details": {
+      "preserve": [
+        "fabric texture",
+        "natural drape",
+        "color accuracy"
+      ],
+      "enhance": [
+        "garment structure",
+        "interior visibility"
+      ],
+      "avoid": [
+        "artificial stiffness",
+        "color shift",
+        "harsh edges"
+      ]
+    }
+  }
+}

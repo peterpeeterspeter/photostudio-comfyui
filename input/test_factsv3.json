@@ -1,0 +1,31 @@
+{
+  "garment_type": "dress",
+  "primary_color": "navy blue",
+  "primary_material": "cotton",
+  "sleeve_length": "long",
+  "neckline": "crew",
+  "fit_type": "relaxed",
+  "has_patterns": true,
+  "pattern_type": "floral",
+  "has_embellishments": false,
+  "style_category": "casual",
+  "garment_length": "midi",
+  "chest_width": "42cm",
+  "fabric_weight": "medium",
+  "color_accuracy": "high",
+  "ghost_mannequin_requirements": {
+    "interior_visibility_needed": true,
+    "volume_preservation": "high",
+    "drape_natural": true,
+    "symmetry_critical": true,
+    "edge_precision": "high"
+  },
+  "rendering_hints": {
+    "fabric_behavior": "flowing",
+    "critical_features": [
+      "neckline",
+      "sleeves",
+      "drape"
+    ]
+  }
+}

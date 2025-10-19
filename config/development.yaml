@@ -1,0 +1,219 @@
+# Development Configuration for Photostudio ComfyUI
+# Environment: Development/Local
+# Use: Local development, testing, and experimentation
+
+# Server Configuration
+server:
+  host: "127.0.0.1"
+  port: 8188
+  workers: 1
+  timeout: 300
+  max_queue_size: 10
+
+# Resource Management
+resources:
+  # GPU Configuration (optimized for local development)
+  gpu:
+    memory_management: "lowvram"  # auto, lowvram, novram
+    device_id: 0
+    max_vram_gb: 8
+    offload_models: true
+    
+  # CPU Configuration  
+  cpu:
+    max_workers: 2
+    thread_limit: 4
+    memory_limit_gb: 16
+    
+  # Storage
+  storage:
+    input_dir: "input"
+    output_dir: "output"
+    models_dir: "ComfyUI/models"
+    temp_dir: "temp"
+    cleanup_interval_hours: 4
+    max_storage_gb: 100
+
+# Workflow Configuration
+workflow:
+  default_workflow: "ghostmannequin_comfyui_v1.json"
+  
+  # Generation Settings (faster for development)
+  generation:
+    default_steps: 20
+    default_cfg: 7.5
+    default_sampler: "euler_ancestral"
+    default_scheduler: "normal"
+    seed_mode: "fixed"  # random, fixed, increment
+    fixed_seed: 42
+    
+  # Quality Settings (balanced for speed)
+  quality:
+    min_resolution: [512, 512]
+    max_resolution: [1024, 1024]
+    output_format: "PNG"
+    jpeg_quality: 85
+    png_compression: 3
+
+# Batch Processing (limited for development)
+batch:
+  max_concurrent_workflows: 1
+  retry_failed_items: true
+  max_retries: 1
+  progress_update_interval: 5
+  
+  # Reporting
+  reporting:
+    generate_csv: true
+    generate_summary: true
+    save_config_snapshot: false
+    metrics_enabled: false
+
+# Monitoring & Logging
+monitoring:
+  # Logging Configuration (verbose for debugging)
+  logging:
+    level: "DEBUG"  # DEBUG, INFO, WARNING, ERROR
+    file_path: "output/comfyui_dev.log"
+    max_file_size_mb: 50
+    backup_count: 3
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s"
+    
+  # Metrics (disabled for development)
+  metrics:
+    enabled: false
+    endpoint: "/metrics"
+    collection_interval: 60
+    retention_days: 7
+    
+  # Health Checks (simplified)
+  health_checks:
+    enabled: true
+    interval_seconds: 120
+    endpoints:
+      - "/health"
+      - "/queue"
+
+# Security (relaxed for development)
+security:
+  # API Security
+  api:
+    enable_cors: true
+    allowed_origins: ["http://localhost:3000", "http://127.0.0.1:3000"]
+    rate_limiting:
+      enabled: false
+      requests_per_minute: 1000
+      burst_size: 100
+      
+  # File Security (relaxed)
+  file_security:
+    max_file_size_mb: 50
+    allowed_extensions: [".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tiff"]
+    scan_uploads: false
+    
+  # Network Security (disabled for local dev)
+  network:
+    bind_localhost_only: true
+    enable_https: false
+    ssl_cert_path: ""
+    ssl_key_path: ""
+
+# Model Configuration
+models:
+  # Required Models (same as production)
+  required:
+    checkpoint: "sd_xl_base_1.0.safetensors"
+    controlnet: "control_v11p_sd15_canny.pth"
+    
+  # Optional Models
+  optional:
+    vae: "sdxl_vae.safetensors"
+    
+  # Auto-download (enabled for convenience)
+  auto_download:
+    enabled: true
+    verify_integrity: false  # Skip for speed in dev
+    cleanup_temp_files: true
+    retry_failed_downloads: true
+
+# Integration Settings (disabled for development)
+integration:
+  # External APIs
+  apis:
+    huggingface_token: "${HF_TOKEN}"
+    webhook_url: ""
+    
+  # Database (disabled)
+  database:
+    enabled: false
+    connection_string: ""
+    pool_size: 1
+    timeout: 10
+    
+  # Message Queue (disabled)  
+  message_queue:
+    enabled: false
+    broker_url: ""
+    result_backend: ""
+    task_timeout: 1800
+
+# Performance Tuning (optimized for development)
+performance:
+  # Memory Optimization (aggressive for limited resources)
+  memory:
+    aggressive_offloading: true
+    model_caching: false  # Disable to save memory
+    clear_cache_interval: 60
+    gc_threshold: 0.7
+    
+  # I/O Optimization
+  io:
+    async_file_operations: false  # Simpler for debugging
+    buffer_size_mb: 32
+    concurrent_uploads: 1
+    concurrent_downloads: 1
+    
+  # Processing Optimization
+  processing:
+    parallel_preprocessing: false  # Easier debugging
+    batch_size_optimization: false
+    pipeline_caching: false
+    fast_preview: true
+
+# Backup & Recovery (minimal for development)
+backup:
+  # Configuration Backup
+  config_backup:
+    enabled: false
+    interval_hours: 24
+    retention_days: 3
+    location: "backups/config"
+    
+  # Model Backup (disabled)
+  model_backup:
+    enabled: false
+    location: "backups/models"
+    compression: false
+    
+  # Output Backup (disabled)
+  output_backup:
+    enabled: false
+    interval_hours: 24
+    retention_days: 1
+    location: "backups/output"
+    sync_to_s3: false
+    s3_bucket: ""
+
+# Development & Debug (enabled for development)
+debug:
+  enabled: true
+  detailed_errors: true
+  profiling: false
+  save_intermediate_results: true
+  webhook_debug: true
+  
+  # Development-specific settings
+  auto_reload: true
+  hot_reload_custom_nodes: true
+  show_memory_usage: true
+  timing_info: true

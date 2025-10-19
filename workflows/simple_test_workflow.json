@@ -1,0 +1,96 @@
+{
+  "workflow": {
+    "1": {
+      "inputs": {
+        "image": "test_garment.jpg",
+        "upload": "image"
+      },
+      "class_type": "LoadImage",
+      "pos": [100, 100]
+    },
+    "2": {
+      "inputs": {
+        "facts_file_path": "input/test_factsv3.json"
+      },
+      "class_type": "LoadFactsNode",
+      "pos": [100, 300]
+    },
+    "3": {
+      "inputs": {
+        "facts_description": ["2", 0],
+        "facts_dict": ["2", 1],
+        "ccj_path": "input/test_ccj_controlblock.json",
+        "custom_additions": "Test simple workflow",
+        "include_chinese": true
+      },
+      "class_type": "PromptBuilder",
+      "pos": [400, 300]
+    },
+    "4": {
+      "inputs": {
+        "ckpt_name": "sd_xl_base_1.0.safetensors"
+      },
+      "class_type": "CheckpointLoaderSimple",
+      "pos": [100, 500]
+    },
+    "5": {
+      "inputs": {
+        "width": 512,
+        "height": 512,
+        "batch_size": 1
+      },
+      "class_type": "EmptyLatentImage",
+      "pos": [400, 500]
+    },
+    "6": {
+      "inputs": {
+        "text": ["3", 0],
+        "clip": ["4", 1]
+      },
+      "class_type": "CLIPTextEncode",
+      "pos": [700, 200]
+    },
+    "7": {
+      "inputs": {
+        "text": "low quality, blurry, distorted",
+        "clip": ["4", 1]
+      },
+      "class_type": "CLIPTextEncode", 
+      "pos": [700, 400]
+    },
+    "8": {
+      "inputs": {
+        "seed": 42,
+        "steps": 10,
+        "cfg": 7.5,
+        "sampler_name": "euler_ancestral", 
+        "scheduler": "normal",
+        "denoise": 1.0,
+        "positive": ["6", 0],
+        "negative": ["7", 0],
+        "model": ["4", 0],
+        "latent_image": ["5", 0]
+      },
+      "class_type": "KSampler",
+      "pos": [1000, 400]
+    },
+    "9": {
+      "inputs": {
+        "samples": ["8", 0],
+        "vae": ["4", 2]
+      },
+      "class_type": "VAEDecode",
+      "pos": [1300, 400]
+    },
+    "10": {
+      "inputs": {
+        "filename_prefix": "simple_test_",
+        "images": ["9", 0]
+      },
+      "class_type": "SaveImage",
+      "pos": [1300, 200]
+    }
+  },
+  "extra": {},
+  "version": 0.4
+}

@@ -1,0 +1,221 @@
+version: '3.8'
+
+services:
+  # ComfyUI Ghost Mannequin Server
+  comfyui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: photostudio/comfyui:latest
+    container_name: photostudio-comfyui
+    restart: unless-stopped
+    
+    # GPU support
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    
+    # Environment variables
+    environment:
+      - COMFYUI_CONFIG_PATH=/app/config/production.yaml
+      - CUDA_VISIBLE_DEVICES=0
+      - PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512
+      - HF_TOKEN=${HF_TOKEN:-}
+      - WEBHOOK_URL=${WEBHOOK_URL:-}
+    
+    # Port mapping
+    ports:
+      - "8188:8188"
+    
+    # Volume mounts
+    volumes:
+      # Persistent data
+      - comfyui-models:/app/ComfyUI/models
+      - comfyui-input:/app/input
+      - comfyui-output:/app/output
+      - comfyui-logs:/app/logs
+      - comfyui-backups:/app/backups
+      
+      # Configuration (optional override)
+      - ./config:/app/config:ro
+      
+      # Custom nodes (if you need to mount additional ones)
+      - ./custom_nodes:/app/custom_nodes:ro
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8188/health"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+      start_period: 60s
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '8.0'
+          memory: 32G
+        reservations:
+          cpus: '2.0'
+          memory: 8G
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "10"
+    
+    # Network
+    networks:
+      - comfyui-network
+
+  # Redis (optional - for queue management)
+  redis:
+    image: redis:7-alpine
+    container_name: photostudio-redis
+    restart: unless-stopped
+    profiles:
+      - with-redis
+    
+    command: redis-server --save 20 1 --loglevel warning
+    
+    volumes:
+      - redis-data:/data
+    
+    ports:
+      - "6379:6379"
+    
+    networks:
+      - comfyui-network
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+
+  # Nginx reverse proxy (optional)
+  nginx:
+    image: nginx:alpine
+    container_name: photostudio-nginx
+    restart: unless-stopped
+    profiles:
+      - with-nginx
+    
+    ports:
+      - "80:80"
+      - "443:443"
+    
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - nginx-logs:/var/log/nginx
+    
+    depends_on:
+      - comfyui
+    
+    networks:
+      - comfyui-network
+
+  # Monitoring with Prometheus (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: photostudio-prometheus
+    restart: unless-stopped
+    profiles:
+      - with-monitoring
+    
+    ports:
+      - "9090:9090"
+    
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    
+    networks:
+      - comfyui-network
+
+  # Grafana dashboard (optional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: photostudio-grafana
+    restart: unless-stopped
+    profiles:
+      - with-monitoring
+    
+    ports:
+      - "3000:3000"
+    
+    volumes:
+      - grafana-data:/var/lib/grafana
+    
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    
+    networks:
+      - comfyui-network
+
+# Networks
+networks:
+  comfyui-network:
+    driver: bridge
+
+# Volumes
+volumes:
+  # ComfyUI persistent data
+  comfyui-models:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${MODELS_PATH:-./data/models}
+      o: bind
+  
+  comfyui-input:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${INPUT_PATH:-./data/input}
+      o: bind
+  
+  comfyui-output:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${OUTPUT_PATH:-./data/output}
+      o: bind
+  
+  comfyui-logs:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${LOGS_PATH:-./data/logs}
+      o: bind
+  
+  comfyui-backups:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${BACKUPS_PATH:-./data/backups}
+      o: bind
+  
+  # Optional services data
+  redis-data:
+  prometheus-data:
+  grafana-data:
+  nginx-logs:
