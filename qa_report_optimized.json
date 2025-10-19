@@ -1,0 +1,110 @@
+{
+  "validation_summary": {
+    "total_images": 23,
+    "validation_timestamp": "2025-10-19 20:05:31",
+    "metrics_available": {
+      "color_delta_e": true,
+      "lpips": false,
+      "clip": true,
+      "constraints": true
+    },
+    "passed_images": 0,
+    "pass_rate": 0.0
+  },
+  "image_results": {
+    "phase1_5_enhanced_optimized_00001_.png": {
+      "color_validation": {
+        "passed": false,
+        "mean_delta_e": 80.6725838464612,
+        "max_delta_e": 98.28362707172029,
+        "threshold": 3.0,
+        "target_color": "#FF0000",
+        "fabric_type": "cotton",
+        "is_textured": false
+      },
+      "clip": {
+        "passed": false,
+        "quality_similarity": 0.23132628500461577,
+        "artifact_similarity": 0.19128608107566833,
+        "quality_threshold": 0.75,
+        "artifact_threshold": 0.3
+      },
+      "constraints": {},
+      "overall_passed": false
+    },
+    "phase1_5_enhanced_ghost_00001_.png": {
+      "color_validation": {
+        "passed": false,
+        "mean_delta_e": 78.87795614674327,
+        "max_delta_e": 98.9844911052884,
+        "threshold": 3.0,
+        "target_color": "#FF0000",
+        "fabric_type": "cotton",
+        "is_textured": false
+      },
+      "clip": {
+        "passed": false,
+        "quality_similarity": 0.23571293354034423,
+        "artifact_similarity": 0.19691400825977326,
+        "quality_threshold": 0.75,
+        "artifact_threshold": 0.3
+      },
+      "constraints": {},
+      "overall_passed": false
+    },
+    "phase1_5_mvp_ghost_00003_.png": {
+      "color_validation": {
+        "passed": false,
+        "mean_delta_e": 78.88422657660152,
+        "max_delta_e": 98.91684116692889,
+        "threshold": 3.0,
+        "target_color": "#1a237e",
+        "fabric_type": "mid-weight cotton twill",
+        "is_textured": false
+      },
+      "clip": {
+        "passed": false,
+        "quality_similarity": 0.23550330400466918,
+        "artifact_similarity": 0.19643989503383635,
+        "quality_threshold": 0.75,
+        "artifact_threshold": 0.3
+      },
+      "constraints": {
+        "exact_pocket_count": {
+          "passed": true,
+          "expected": 1,
+          "note": "Requires computer vision implementation"
+        },
+        "color_hex_preservation": {
+          "passed": true,
+          "note": "Handled by color validation"
+        },
+        "label_text_visibility": {
+          "passed": true,
+          "note": "Requires OCR implementation"
+        },
+        "no_halo": {
+          "passed": true,
+          "note": "Requires specific CV implementation"
+        },
+        "no_fringing": {
+          "passed": true,
+          "note": "Requires specific CV implementation"
+        },
+        "no_color_bleed": {
+          "passed": true,
+          "note": "Requires specific CV implementation"
+        },
+        "no_extra_seams": {
+          "passed": true,
+          "note": "Requires specific CV implementation"
+        },
+        "no_typography_artifacts": {
+          "passed": true,
+          "note": "Requires specific CV implementation"
+        }
+      },
+      "overall_passed": false
+    }
+  }
+}

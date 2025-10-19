@@ -40,10 +40,10 @@
       "mask1": ["2", 1],
       "mask2": ["3", 1],
       "blend_mode": "weighted",
-      "rmbg_weight": 0.4,
-      "u2net_weight": 0.6,
-      "blur_radius": 4,
-      "dilate_pixels": 8
+      "mask1_weight": 0.4,
+      "mask2_weight": 0.6,
+      "edge_feather": 4,
+      "dilate": 8
     },
     "class_type": "MaskEnsemble",
     "_meta": {

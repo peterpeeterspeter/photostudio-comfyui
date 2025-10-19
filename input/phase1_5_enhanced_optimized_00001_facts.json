@@ -1,0 +1,22 @@
+{
+  "analysis_mode": "light",
+  "garment": {
+    "category": "oxford dress shirt",
+    "color_hex": "#1a237e",
+    "color_name": "navy blue",
+    "fabric": "mid-weight cotton twill",
+    "silhouette": "tailored",
+    "finish": "matte",
+    "pockets_count": 1,
+    "pattern": "solid",
+    "transparency_level": 0.0,
+    "complexity_score": 0.3
+  },
+  "photography": {
+    "bg": "pure_white",
+    "lighting": "soft_even_high_key",
+    "frame": "4:5",
+    "coverage_pct": 85
+  },
+  "risk_score": 0.2
+}
