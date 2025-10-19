@@ -1,0 +1,183 @@
+{
+  "1": {
+    "inputs": {
+      "image": "test_garment.jpg"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Garment Image"
+    }
+  },
+  "2": {
+    "inputs": {
+      "image": ["1", 0],
+      "threshold": 0.30,
+      "mask_blur": 3,
+      "post_dilate": 8,
+      "output_mode": "both"
+    },
+    "class_type": "RMBGNode",
+    "_meta": {
+      "title": "RMBG Background Removal"
+    }
+  },
+  "3": {
+    "inputs": {
+      "facts_file_path": "test_garment_facts.json"
+    },
+    "class_type": "LoadFactsNode",
+    "_meta": {
+      "title": "Load Light Facts"
+    }
+  },
+  "4": {
+    "inputs": {
+      "facts_json": ["3", 1],
+      "prompt_style": "detailed",
+      "include_constraints": true
+    },
+    "class_type": "PromptFromLightFacts",
+    "_meta": {
+      "title": "Generate Prompt from Facts"
+    }
+  },
+  "5": {
+    "inputs": {
+      "ckpt_name": "sd_xl_base_1.0.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load SDXL Model"
+    }
+  },
+  "6": {
+    "inputs": {
+      "control_net_name": "control_v11p_sd15_canny.pth"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load Canny ControlNet"
+    }
+  },
+  "7": {
+    "inputs": {
+      "image": ["2", 0],
+      "low_threshold": 0.4,
+      "high_threshold": 0.8
+    },
+    "class_type": "Canny",
+    "_meta": {
+      "title": "Generate Canny Edges"
+    }
+  },
+  "8": {
+    "inputs": {
+      "clip": ["5", 1],
+      "text": ["4", 0]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Encode Positive Prompt"
+    }
+  },
+  "9": {
+    "inputs": {
+      "clip": ["5", 1],
+      "text": ["4", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Encode Negative Prompt"
+    }
+  },
+  "10": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Create Empty Latent"
+    }
+  },
+  "11": {
+    "inputs": {
+      "positive": ["8", 0],
+      "negative": ["9", 0],
+      "control_net": ["6", 0],
+      "image": ["7", 0],
+      "strength": 0.9,
+      "start_percent": 0.0,
+      "end_percent": 1.0
+    },
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "Apply ControlNet Advanced"
+    }
+  },
+  "12": {
+    "inputs": {
+      "model": ["5", 0],
+      "positive": ["11", 0],
+      "negative": ["11", 1],
+      "latent_image": ["10", 0],
+      "seed": 123456,
+      "steps": 20,
+      "cfg": 7.0,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": 1.0
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Generate Ghost Mannequin with ControlNet"
+    }
+  },
+  "13": {
+    "inputs": {
+      "samples": ["12", 0],
+      "vae": ["5", 2]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode to Image"
+    }
+  },
+  "14": {
+    "inputs": {
+      "image": ["13", 0],
+      "mask": ["2", 1],
+      "ssim_threshold": 0.75,
+      "alpha_threshold": 0.97,
+      "border_width": 8
+    },
+    "class_type": "QualityGateEdge",
+    "_meta": {
+      "title": "Quality Gate: Edge Check"
+    }
+  },
+  "15": {
+    "inputs": {
+      "image": ["13", 0],
+      "mask": ["2", 1],
+      "purity_threshold": 0.95,
+      "white_threshold": 250.0,
+      "color_space": "LAB"
+    },
+    "class_type": "QualityGateBackground",
+    "_meta": {
+      "title": "Quality Gate: Background Check"
+    }
+  },
+  "16": {
+    "inputs": {
+      "images": ["13", 0],
+      "filename_prefix": "phase1_5_controlnet_ghost"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save ControlNet Ghost Mannequin"
+    }
+  }
+}

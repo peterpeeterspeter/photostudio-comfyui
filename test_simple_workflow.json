@@ -1,0 +1,52 @@
+{
+  "1": {
+    "inputs": {
+      "ckpt_name": "sd_xl_base_1.0.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple"
+  },
+  "2": {
+    "inputs": {
+      "text": "test prompt for torch.compiler fix",
+      "clip": ["1", 1]
+    },
+    "class_type": "CLIPTextEncode"
+  },
+  "3": {
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage"
+  },
+  "4": {
+    "inputs": {
+      "model": ["1", 0],
+      "positive": ["2", 0],
+      "negative": ["2", 0],
+      "latent_image": ["3", 0],
+      "seed": 123456,
+      "steps": 1,
+      "cfg": 7.0,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": 1.0
+    },
+    "class_type": "KSampler"
+  },
+  "5": {
+    "inputs": {
+      "samples": ["4", 0],
+      "vae": ["1", 2]
+    },
+    "class_type": "VAEDecode"
+  },
+  "6": {
+    "inputs": {
+      "filename_prefix": "test_fix",
+      "images": ["5", 0]
+    },
+    "class_type": "SaveImage"
+  }
+}

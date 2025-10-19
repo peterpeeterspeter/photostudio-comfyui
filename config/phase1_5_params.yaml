@@ -1,0 +1,88 @@
+# Phase 1.5 Ghost Mannequin Pipeline Configuration
+# Production-ready parameters optimized for quality and performance
+
+segmentation:
+  rmbg_threshold: 0.30
+  mask_blur: 3
+  post_dilate: 8
+  model_name: "u2net"
+
+# Phase 1.5 Enhanced Parameters
+phase_1_5_enhanced:
+  segmentation_ensemble:
+    use_u2net: true
+    blend_mode: "weighted"  # or "intersect"
+    rmbg_weight: 0.4
+    u2net_weight: 0.6
+    edge_feather: 4
+    dilate: 8
+  
+  ip_adapter:
+    enabled: true
+    conditional_on_pattern: true
+    weight: 0.8
+    patterns_requiring_adapter: ["striped", "printed", "textured", "floral", "geometric"]
+  
+  controlnet_inpaint:
+    strength: 0.9
+    denoise: 0.33
+    mask_dilate: 12
+    mask_feather: 3
+  
+  quality_validation:
+    lpips_threshold: 0.2
+    clip_similarity_threshold: 0.75
+    clip_artifact_threshold: 0.3
+
+controlnet:
+  canny_low: 120
+  canny_high: 240
+  strength: 0.9
+  start_percent: 0.0
+  end_percent: 1.0
+
+generation:
+  model: "sdxl"
+  steps: 24
+  cfg: 6.5
+  sampler: "dpmpp_2m_karras"
+  scheduler: "karras"
+  seed: 123456  # fixed for determinism
+  width: 1024
+  height: 1024
+
+inpaint:
+  denoise: 0.35
+  mask_dilate: 12
+  feather: 3
+  steps: 16
+  cfg: 5.5
+
+quality_thresholds:
+  edge_ssim_min: 0.75
+  edge_alpha_min: 0.97
+  bg_purity_min: 0.95
+  bg_white_threshold: 250.0
+  color_delta_e_uni_max: 3.0
+  color_delta_e_textured_max: 5.0
+
+prompting:
+  style: "detailed"
+  include_constraints: true
+  negative_boost: 1.0
+  magic_token: "IMG_2094.CR2"
+
+routing:
+  default_model: "sdxl"
+  flux_fallback: true
+  auto_model_selection: true
+
+batch_processing:
+  max_concurrent: 2
+  queue_check_interval: 5
+  timeout_minutes: 30
+
+output:
+  filename_prefix: "ghost_"
+  format: "png"
+  quality: 95

@@ -1,0 +1,25 @@
+{
+  "schema_version": "3.1",
+  "analysis_mode": "light",
+  "garment": {
+    "category": "oxford dress shirt",
+    "silhouette": "tailored",
+    "fabric": "mid-weight cotton twill",
+    "finish": "matte",
+    "color_hex": "#1a237e",
+    "color_name": "navy blue",
+    "closures": "front button placket",
+    "pockets_count": 1,
+    "label_text": "Test Brand \u00a9",
+    "special_notes": "test garment for validation"
+  },
+  "photography": {
+    "bg": "pure_white",
+    "lighting": "soft_even_high_key",
+    "frame": "4:5",
+    "coverage_pct": 85
+  },
+  "routing": {
+    "suggested_model": "sdxl"
+  }
+}

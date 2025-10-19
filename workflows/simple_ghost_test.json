@@ -1,0 +1,152 @@
+{
+  "last_node_id": 10,
+  "last_link_id": 9,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [100, 100],
+      "size": {"0": 315, "1": 314},
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [1], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "LoadImage"},
+      "widgets_values": ["test_garment.jpg", "image"]
+    },
+    {
+      "id": 2,
+      "type": "CheckpointLoaderSimple",
+      "pos": [100, 500],
+      "size": {"0": 315, "1": 98},
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {"name": "MODEL", "type": "MODEL", "links": [2], "slot_index": 0},
+        {"name": "CLIP", "type": "CLIP", "links": [3, 4], "slot_index": 1},
+        {"name": "VAE", "type": "VAE", "links": [5], "slot_index": 2}
+      ],
+      "properties": {"Node name for S&R": "CheckpointLoaderSimple"},
+      "widgets_values": ["sd_xl_base_1.0.safetensors"]
+    },
+    {
+      "id": 3,
+      "type": "CLIPTextEncode",
+      "pos": [500, 100],
+      "size": {"0": 400, "1": 200},
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {"name": "clip", "type": "CLIP", "link": 3}
+      ],
+      "outputs": [
+        {"name": "CONDITIONING", "type": "CONDITIONING", "links": [6], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "CLIPTextEncode"},
+      "widgets_values": ["Professional ghost mannequin product photo of a navy blue oxford dress shirt, tailored silhouette, mid-weight cotton twill fabric, matte finish. Color: #1a237e (navy blue) — exact match required. Details: front button placket, 1 pocket. Interior neckline visible. Studio: pure white background, soft even high key lighting. Composition: 4:5 aspect ratio, garment 85% of frame. Sharp, professional photography, no halo or fringing artifacts."]
+    },
+    {
+      "id": 4,
+      "type": "CLIPTextEncode",
+      "pos": [500, 350],
+      "size": {"0": 400, "1": 200},
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {"name": "clip", "type": "CLIP", "link": 4}
+      ],
+      "outputs": [
+        {"name": "CONDITIONING", "type": "CONDITIONING", "links": [7], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "CLIPTextEncode"},
+      "widgets_values": ["blurry, low quality, distorted, deformed, extra limbs, extra fingers, text, watermark, signature, logo, brand name, multiple garments, mannequin visible, human model, person, face, hands, body parts, dark background, colored background, shadows, reflections, artifacts, noise, grain, compression"]
+    },
+    {
+      "id": 5,
+      "type": "EmptyLatentImage",
+      "pos": [500, 600],
+      "size": {"0": 315, "1": 106},
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "outputs": [
+        {"name": "LATENT", "type": "LATENT", "links": [8], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "EmptyLatentImage"},
+      "widgets_values": [1024, 1024, 1]
+    },
+    {
+      "id": 6,
+      "type": "KSampler",
+      "pos": [1000, 100],
+      "size": {"0": 315, "1": 262},
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {"name": "model", "type": "MODEL", "link": 2},
+        {"name": "positive", "type": "CONDITIONING", "link": 6},
+        {"name": "negative", "type": "CONDITIONING", "link": 7},
+        {"name": "latent_image", "type": "LATENT", "link": 8}
+      ],
+      "outputs": [
+        {"name": "LATENT", "type": "LATENT", "links": [9], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "KSampler"},
+      "widgets_values": [123456, "fixed", 24, 6.5, "euler", "normal", 1.0]
+    },
+    {
+      "id": 7,
+      "type": "VAEDecode",
+      "pos": [1400, 100],
+      "size": {"0": 210, "1": 46},
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {"name": "samples", "type": "LATENT", "link": 9},
+        {"name": "vae", "type": "VAE", "link": 5}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [10], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "VAEDecode"}
+    },
+    {
+      "id": 8,
+      "type": "SaveImage",
+      "pos": [1700, 100],
+      "size": {"0": 315, "1": 270},
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {"name": "filename_prefix", "type": "STRING", "link": null},
+        {"name": "images", "type": "IMAGE", "link": 10}
+      ],
+      "properties": {"Node name for S&R": "SaveImage"},
+      "widgets_values": ["ghost_test"]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 1, 0, "IMAGE"],
+    [2, 2, 0, 6, 0, "MODEL"],
+    [3, 2, 1, 3, 0, "CLIP"],
+    [4, 2, 1, 4, 0, "CLIP"],
+    [5, 2, 2, 7, 1, "VAE"],
+    [6, 3, 0, 6, 1, "CONDITIONING"],
+    [7, 4, 0, 6, 2, "CONDITIONING"],
+    [8, 5, 0, 6, 3, "LATENT"],
+    [9, 6, 0, 7, 0, "LATENT"],
+    [10, 7, 0, 8, 1, "IMAGE"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

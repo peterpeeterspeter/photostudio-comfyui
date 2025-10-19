@@ -1,0 +1,223 @@
+{
+  "last_node_id": 20,
+  "nodes": {
+    "1": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "test_garment.jpg",
+        "upload": "image"
+      },
+      "pos": [100, 100]
+    },
+    "2": {
+      "class_type": "LoadFactsNode",
+      "inputs": {
+        "facts_file_path": "input/light_facts_schema.json"
+      },
+      "pos": [100, 300]
+    },
+    "3": {
+      "class_type": "RMBGNode",
+      "inputs": {
+        "image": ["1", 0],
+        "threshold": 0.30,
+        "mask_blur": 3,
+        "post_dilate": 8,
+        "output_mode": "both",
+        "model_name": "u2net"
+      },
+      "pos": [400, 100]
+    },
+    "4": {
+      "class_type": "PromptFromLightFacts",
+      "inputs": {
+        "facts_json": ["2", 1],
+        "prompt_style": "detailed",
+        "include_constraints": true,
+        "custom_additions": "",
+        "negative_boost": 1.0
+      },
+      "pos": [400, 300]
+    },
+    "5": {
+      "class_type": "CheckpointLoaderSimple",
+      "inputs": {
+        "ckpt_name": "sd_xl_base_1.0.safetensors"
+      },
+      "pos": [100, 500]
+    },
+    "6": {
+      "class_type": "ModelRouter",
+      "inputs": {
+        "facts_json": ["2", 1],
+        "sdxl_model": ["5", 0],
+        "sdxl_vae": ["5", 2],
+        "sdxl_clip": ["5", 1],
+        "flux_model": null,
+        "flux_vae": null,
+        "flux_clip": null,
+        "force_model": ""
+      },
+      "pos": [700, 500]
+    },
+    "7": {
+      "class_type": "CannyEdgePreprocessor",
+      "inputs": {
+        "image": ["3", 0],
+        "low_threshold": 120,
+        "high_threshold": 240,
+        "l2gradient": false
+      },
+      "pos": [700, 100]
+    },
+    "8": {
+      "class_type": "ControlNetLoader",
+      "inputs": {
+        "control_net_name": "control_v11p_sd15_canny.pth"
+      },
+      "pos": [1000, 100]
+    },
+    "9": {
+      "class_type": "ControlNetApply",
+      "inputs": {
+        "conditioning": ["10", 0],
+        "control_net": ["8", 0],
+        "image": ["7", 0],
+        "strength": 0.9,
+        "start_percent": 0.0,
+        "end_percent": 1.0
+      },
+      "pos": [1300, 200]
+    },
+    "10": {
+      "class_type": "CLIPTextEncode",
+      "inputs": {
+        "text": ["4", 0],
+        "clip": ["6", 2]
+      },
+      "pos": [1000, 200]
+    },
+    "11": {
+      "class_type": "CLIPTextEncode",
+      "inputs": {
+        "text": ["4", 1],
+        "clip": ["6", 2]
+      },
+      "pos": [1000, 400]
+    },
+    "12": {
+      "class_type": "EmptyLatentImage",
+      "inputs": {
+        "width": 1024,
+        "height": 1024,
+        "batch_size": 1
+      },
+      "pos": [1000, 600]
+    },
+    "13": {
+      "class_type": "KSampler",
+      "inputs": {
+        "seed": 123456,
+        "steps": 24,
+        "cfg": 6.5,
+        "sampler_name": "dpmpp_2m_karras",
+        "scheduler": "karras",
+        "positive": ["9", 0],
+        "negative": ["11", 0],
+        "model": ["6", 0],
+        "latent_image": ["12", 0]
+      },
+      "pos": [1300, 400]
+    },
+    "14": {
+      "class_type": "VAEDecode",
+      "inputs": {
+        "samples": ["13", 0],
+        "vae": ["6", 1]
+      },
+      "pos": [1600, 400]
+    },
+    "15": {
+      "class_type": "QualityGateEdge",
+      "inputs": {
+        "image": ["14", 0],
+        "mask": ["3", 1],
+        "ssim_threshold": 0.75,
+        "alpha_threshold": 0.97,
+        "border_width": 6,
+        "debug_mode": false
+      },
+      "pos": [1900, 200]
+    },
+    "16": {
+      "class_type": "QualityGateBackground",
+      "inputs": {
+        "image": ["14", 0],
+        "mask": ["3", 1],
+        "purity_threshold": 0.95,
+        "white_threshold": 250.0,
+        "color_space": "LAB",
+        "debug_mode": false,
+        "target_color": "#FFFFFF"
+      },
+      "pos": [1900, 400]
+    },
+    "17": {
+      "class_type": "ConditionalSwitch",
+      "inputs": {
+        "condition": ["18", 0],
+        "input_pass": ["14", 0],
+        "input_fail": ["19", 0],
+        "condition_2": null,
+        "input_pass_2": null,
+        "input_fail_2": null
+      },
+      "pos": [2200, 300]
+    },
+    "18": {
+      "class_type": "BooleanAnd",
+      "inputs": {
+        "a": ["15", 0],
+        "b": ["16", 0]
+      },
+      "pos": [1900, 600]
+    },
+    "19": {
+      "class_type": "SmartInpaintPolish",
+      "inputs": {
+        "image": ["14", 0],
+        "mask": ["3", 1],
+        "model": ["6", 0],
+        "vae": ["6", 1],
+        "clip": ["6", 2],
+        "facts_json": ["2", 1],
+        "denoise": 0.35,
+        "mask_dilate": 12,
+        "feather": 3,
+        "seed": 123456,
+        "steps": 16,
+        "cfg": 5.5,
+        "positive_prompt": "",
+        "negative_prompt": "",
+        "sampler_name": "dpmpp_2m_karras",
+        "scheduler": "karras"
+      },
+      "pos": [1900, 800]
+    },
+    "20": {
+      "class_type": "SaveImage",
+      "inputs": {
+        "filename_prefix": "ghost_complete_",
+        "images": ["17", 0]
+      },
+      "pos": [2500, 300]
+    }
+  },
+  "extra": {
+    "ds": {
+      "scale": 0.7,
+      "offset": [0, 0]
+    }
+  },
+  "version": 0.4
+}

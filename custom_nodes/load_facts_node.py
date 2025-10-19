@@ -44,7 +44,52 @@ class LoadFactsNode:
             return f"ERROR: Failed to load facts: {str(e)}", "{}"
     
     def _generate_garment_description(self, facts: Dict[str, Any]) -> str:
-        """Generate concise garment description from FactsV3 fields"""
+        """Generate concise garment description from FactsV3 or Light Facts fields"""
+        
+        # Check if this is Light Facts mode
+        analysis_mode = facts.get('analysis_mode', 'full')
+        
+        if analysis_mode == 'light':
+            return self._generate_light_facts_description(facts)
+        else:
+            return self._generate_full_facts_description(facts)
+    
+    def _generate_light_facts_description(self, facts: Dict[str, Any]) -> str:
+        """Generate description from Light Facts structure"""
+        parts = []
+        garment = facts.get('garment', {})
+        
+        # Core garment info from Light Facts
+        if garment.get('category'):
+            parts.append(garment['category'])
+        
+        if garment.get('color_name'):
+            parts.append(f"{garment['color_name']} color")
+        
+        if garment.get('fabric'):
+            parts.append(f"{garment['fabric']} material")
+        
+        if garment.get('silhouette'):
+            parts.append(f"{garment['silhouette']} silhouette")
+        
+        if garment.get('finish'):
+            parts.append(f"{garment['finish']} finish")
+        
+        # Key features
+        if garment.get('closures'):
+            parts.append(garment['closures'])
+        
+        if garment.get('pockets_count', 0) > 0:
+            parts.append(f"{garment['pockets_count']} pockets")
+        
+        # Construct description
+        if parts:
+            return ", ".join(parts[:6])  # Limit for Light Facts
+        else:
+            return "Generic garment"
+    
+    def _generate_full_facts_description(self, facts: Dict[str, Any]) -> str:
+        """Generate description from full FactsV3 structure (original logic)"""
         parts = []
         
         # Core garment info

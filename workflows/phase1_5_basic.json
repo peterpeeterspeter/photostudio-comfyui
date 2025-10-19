@@ -1,0 +1,89 @@
+{
+  "1": {
+    "inputs": {
+      "image": "test_garment.jpg"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Garment Image"
+    }
+  },
+  "2": {
+    "inputs": {
+      "ckpt_name": "sd_xl_base_1.0.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load SDXL Model"
+    }
+  },
+  "3": {
+    "inputs": {
+      "clip": ["2", 1],
+      "text": "Professional ghost mannequin product photo of a red t-shirt, cotton fabric, relaxed silhouette, matte finish. Color: #FF0000 (red) — exact match required. Studio: pure white background, soft even high key lighting. Composition: 4:5 aspect ratio, garment 85% of frame. Sharp, professional photography, no halo or fringing artifacts."
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Encode Positive Prompt"
+    }
+  },
+  "4": {
+    "inputs": {
+      "clip": ["2", 1],
+      "text": "blurry, low quality, distorted, deformed, extra limbs, extra fingers, text, watermark, signature, logo, brand name, multiple garments, mannequin visible, human model, person, face, hands, body parts, dark background, colored background, shadows, reflections, artifacts, noise, grain, compression"
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Encode Negative Prompt"
+    }
+  },
+  "5": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Create Empty Latent"
+    }
+  },
+  "6": {
+    "inputs": {
+      "model": ["2", 0],
+      "positive": ["3", 0],
+      "negative": ["4", 0],
+      "latent_image": ["5", 0],
+      "seed": 123456,
+      "steps": 20,
+      "cfg": 7.0,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": 1.0
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Generate Ghost Mannequin"
+    }
+  },
+  "7": {
+    "inputs": {
+      "samples": ["6", 0],
+      "vae": ["2", 2]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode to Image"
+    }
+  },
+  "8": {
+    "inputs": {
+      "images": ["7", 0],
+      "filename_prefix": "phase1_5_basic_ghost"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Final Image"
+    }
+  }
+}

@@ -1,0 +1,315 @@
+{
+  "last_node_id": 15,
+  "last_link_id": 20,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [50, 50],
+      "size": [200, 50],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [1, 2]}
+      ],
+      "properties": {},
+      "widgets_values": ["input/test_garment.jpg"]
+    },
+    {
+      "id": 2,
+      "type": "RMBGNode",
+      "pos": [300, 50],
+      "size": [200, 50],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {"name": "image", "type": "IMAGE", "link": 1}
+      ],
+      "outputs": [
+        {"name": "processed_image", "type": "IMAGE", "links": [3]},
+        {"name": "mask", "type": "MASK", "links": [4]},
+        {"name": "coverage_ratio", "type": "FLOAT", "links": []}
+      ],
+      "properties": {},
+      "widgets_values": [0.30, 3, 8, "both", "u2net"]
+    },
+    {
+      "id": 3,
+      "type": "U2NetSegmentation",
+      "pos": [300, 150],
+      "size": [200, 50],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {"name": "image", "type": "IMAGE", "link": 2}
+      ],
+      "outputs": [
+        {"name": "processed_image", "type": "IMAGE", "links": []},
+        {"name": "mask", "type": "MASK", "links": [5]},
+        {"name": "confidence_score", "type": "FLOAT", "links": []}
+      ],
+      "properties": {},
+      "widgets_values": [0.35, true, true, "u2net"]
+    },
+    {
+      "id": 4,
+      "type": "MaskEnsemble",
+      "pos": [550, 100],
+      "size": [200, 50],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {"name": "mask1", "type": "MASK", "link": 4},
+        {"name": "mask2", "type": "MASK", "link": 5}
+      ],
+      "outputs": [
+        {"name": "ensemble_mask", "type": "MASK", "links": [6, 7]},
+        {"name": "confidence_score", "type": "FLOAT", "links": []}
+      ],
+      "properties": {},
+      "widgets_values": ["weighted", 0.4, 0.6, 4, 8]
+    },
+    {
+      "id": 5,
+      "type": "LoadFactsNode",
+      "pos": [50, 250],
+      "size": [200, 50],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {"name": "facts_file_path", "type": "STRING", "link": null}
+      ],
+      "outputs": [
+        {"name": "garment_description", "type": "STRING", "links": []},
+        {"name": "facts_json", "type": "STRING", "links": [8]}
+      ],
+      "properties": {},
+      "widgets_values": ["input/test_garment_facts.json"]
+    },
+    {
+      "id": 6,
+      "type": "PromptFromLightFacts",
+      "pos": [300, 250],
+      "size": [250, 100],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {"name": "facts_json", "type": "STRING", "link": 8},
+        {"name": "prompt_style", "type": "COMBO", "link": null},
+        {"name": "include_constraints", "type": "BOOLEAN", "link": null}
+      ],
+      "outputs": [
+        {"name": "positive_prompt", "type": "STRING", "links": [9]},
+        {"name": "negative_prompt", "type": "STRING", "links": [10]},
+        {"name": "constraints_text", "type": "STRING", "links": []}
+      ],
+      "properties": {},
+      "widgets_values": ["detailed", true]
+    },
+    {
+      "id": 7,
+      "type": "IPAdapterConditional",
+      "pos": [600, 250],
+      "size": [250, 100],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {"name": "conditioning", "type": "CONDITIONING", "link": 11},
+        {"name": "reference_image", "type": "IMAGE", "link": 3},
+        {"name": "facts_json", "type": "STRING", "link": 8},
+        {"name": "adapter_weight", "type": "FLOAT", "link": null}
+      ],
+      "outputs": [
+        {"name": "conditioning", "type": "CONDITIONING", "links": [12]},
+        {"name": "adapter_applied", "type": "BOOLEAN", "links": []}
+      ],
+      "properties": {},
+      "widgets_values": [0.8]
+    },
+    {
+      "id": 8,
+      "type": "CheckpointLoaderSimple",
+      "pos": [50, 400],
+      "size": [200, 50],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "MODEL", "type": "MODEL", "links": [13]},
+        {"name": "CLIP", "type": "CLIP", "links": [14, 15]},
+        {"name": "VAE", "type": "VAE", "links": [16]}
+      ],
+      "properties": {},
+      "widgets_values": ["sd_xl_base_1.0.safetensors"]
+    },
+    {
+      "id": 9,
+      "type": "CLIPTextEncode",
+      "pos": [900, 200],
+      "size": [250, 50],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {"name": "clip", "type": "CLIP", "link": 14},
+        {"name": "text", "type": "STRING", "link": 9}
+      ],
+      "outputs": [
+        {"name": "CONDITIONING", "type": "CONDITIONING", "links": [11]}
+      ],
+      "properties": {},
+      "widgets_values": []
+    },
+    {
+      "id": 10,
+      "type": "CLIPTextEncode",
+      "pos": [900, 300],
+      "size": [250, 50],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {"name": "clip", "type": "CLIP", "link": 15},
+        {"name": "text", "type": "STRING", "link": 10}
+      ],
+      "outputs": [
+        {"name": "CONDITIONING", "type": "CONDITIONING", "links": [17]}
+      ],
+      "properties": {},
+      "widgets_values": []
+    },
+    {
+      "id": 11,
+      "type": "EmptyLatentImage",
+      "pos": [300, 400],
+      "size": [200, 50],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "LATENT", "type": "LATENT", "links": [18]}
+      ],
+      "properties": {},
+      "widgets_values": [1024, 1024, 1]
+    },
+    {
+      "id": 12,
+      "type": "KSampler",
+      "pos": [1200, 200],
+      "size": [250, 50],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {"name": "model", "type": "MODEL", "link": 13},
+        {"name": "positive", "type": "CONDITIONING", "link": 12},
+        {"name": "negative", "type": "CONDITIONING", "link": 17},
+        {"name": "latent_image", "type": "LATENT", "link": 18},
+        {"name": "seed", "type": "INT", "link": null},
+        {"name": "steps", "type": "INT", "link": null},
+        {"name": "cfg", "type": "FLOAT", "link": null},
+        {"name": "sampler_name", "type": "COMBO", "link": null},
+        {"name": "scheduler", "type": "COMBO", "link": null},
+        {"name": "denoise", "type": "FLOAT", "link": null}
+      ],
+      "outputs": [
+        {"name": "LATENT", "type": "LATENT", "links": [19]}
+      ],
+      "properties": {},
+      "widgets_values": [123456, "fixed", 20, 7, "euler", "normal", 1]
+    },
+    {
+      "id": 13,
+      "type": "VAEDecode",
+      "pos": [1500, 200],
+      "size": [200, 50],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {"name": "samples", "type": "LATENT", "link": 19},
+        {"name": "vae", "type": "VAE", "link": 16}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [20]}
+      ],
+      "properties": {},
+      "widgets_values": []
+    },
+    {
+      "id": 14,
+      "type": "QualityGateEdge",
+      "pos": [1750, 200],
+      "size": [200, 50],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {"name": "image", "type": "IMAGE", "link": 20},
+        {"name": "mask", "type": "MASK", "link": 6}
+      ],
+      "outputs": [
+        {"name": "pass_fail", "type": "BOOLEAN", "links": []},
+        {"name": "ssim_score", "type": "FLOAT", "links": []},
+        {"name": "alpha_score", "type": "FLOAT", "links": []},
+        {"name": "debug_image", "type": "IMAGE", "links": [21]},
+        {"name": "analysis_text", "type": "STRING", "links": []}
+      ],
+      "properties": {},
+      "widgets_values": [0.75, 0.97, 6, false]
+    },
+    {
+      "id": 15,
+      "type": "SaveImage",
+      "pos": [2000, 200],
+      "size": [200, 50],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 21},
+        {"name": "filename_prefix", "type": "STRING", "link": null}
+      ],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": ["phase1_5_enhanced_ghost"]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "IMAGE"],
+    [2, 1, 0, 3, 0, "IMAGE"],
+    [3, 2, 0, 7, 1, "IMAGE"],
+    [4, 2, 1, 4, 0, "MASK"],
+    [5, 3, 1, 4, 1, "MASK"],
+    [6, 4, 0, 14, 1, "MASK"],
+    [7, 4, 0, 0, 0, "MASK"],
+    [8, 5, 1, 6, 0, "STRING"],
+    [9, 6, 0, 9, 1, "STRING"],
+    [10, 6, 1, 10, 1, "STRING"],
+    [11, 9, 0, 7, 0, "CONDITIONING"],
+    [12, 7, 0, 12, 1, "CONDITIONING"],
+    [13, 8, 0, 12, 0, "MODEL"],
+    [14, 8, 1, 9, 0, "CLIP"],
+    [15, 8, 1, 10, 0, "CLIP"],
+    [16, 8, 2, 13, 1, "VAE"],
+    [17, 10, 0, 12, 2, "CONDITIONING"],
+    [18, 11, 0, 12, 3, "LATENT"],
+    [19, 12, 0, 13, 0, "LATENT"],
+    [20, 13, 0, 14, 0, "IMAGE"],
+    [21, 14, 3, 15, 0, "IMAGE"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

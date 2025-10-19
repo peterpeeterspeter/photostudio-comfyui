@@ -1,0 +1,109 @@
+{
+  "1": {
+    "inputs": {
+      "image": "test_garment.jpg"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Garment Image"
+    }
+  },
+  "2": {
+    "inputs": {
+      "facts_file_path": "test_garment_facts.json"
+    },
+    "class_type": "LoadFactsNode",
+    "_meta": {
+      "title": "Load Light Facts"
+    }
+  },
+  "3": {
+    "inputs": {
+      "facts_json": ["2", 1],
+      "prompt_style": "detailed",
+      "include_constraints": true
+    },
+    "class_type": "PromptFromLightFacts",
+    "_meta": {
+      "title": "Generate Prompt from Facts"
+    }
+  },
+  "4": {
+    "inputs": {
+      "ckpt_name": "sd_xl_base_1.0.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load SDXL Model"
+    }
+  },
+  "5": {
+    "inputs": {
+      "clip": ["4", 1],
+      "text": ["3", 0]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Encode Positive Prompt"
+    }
+  },
+  "6": {
+    "inputs": {
+      "clip": ["4", 1],
+      "text": ["3", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Encode Negative Prompt"
+    }
+  },
+  "7": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Create Empty Latent"
+    }
+  },
+  "8": {
+    "inputs": {
+      "model": ["4", 0],
+      "positive": ["5", 0],
+      "negative": ["6", 0],
+      "latent_image": ["7", 0],
+      "seed": 123456,
+      "steps": 20,
+      "cfg": 7.0,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": 1.0
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Generate Ghost Mannequin"
+    }
+  },
+  "9": {
+    "inputs": {
+      "samples": ["8", 0],
+      "vae": ["4", 2]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode to Image"
+    }
+  },
+  "10": {
+    "inputs": {
+      "images": ["9", 0],
+      "filename_prefix": "phase1_5_mvp_ghost"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Final Image"
+    }
+  }
+}

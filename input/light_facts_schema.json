@@ -1,0 +1,49 @@
+{
+  "schema_version": "3.1",
+  "analysis_mode": "light",
+  "garment": {
+    "category": "oxford dress shirt",
+    "silhouette": "tailored",
+    "fabric": "mid-weight cotton twill",
+    "finish": "matte",
+    "color_hex": "#0A0A0A",
+    "color_name": "near-black",
+    "closures": "front button placket",
+    "pockets_count": 1,
+    "label_text": "ACME Fashions ©",
+    "special_notes": "no hood; show interior neckline",
+    "pattern": "solid",
+    "transparency_level": 0.0,
+    "complexity_score": 0.3
+  },
+  "photography": {
+    "bg": "pure_white",
+    "lighting": "soft_even_high_key",
+    "frame": "4:5",
+    "coverage_pct": 85
+  },
+  "routing": {
+    "suggested_model": "sdxl"
+  },
+  "risk_score": 0.2,
+  "quality_targets": {
+    "edge_ssim_min": 0.75,
+    "bg_purity_min": 0.95,
+    "color_delta_e_uni_max": 3.0,
+    "color_delta_e_textured_max": 5.0
+  },
+  "constraints": {
+    "mandatory_features": [
+      "exact_pocket_count",
+      "color_hex_preservation",
+      "label_text_visibility"
+    ],
+    "forbidden_elements": [
+      "halo",
+      "fringing", 
+      "color_bleed",
+      "extra_seams",
+      "typography_artifacts"
+    ]
+  }
+}

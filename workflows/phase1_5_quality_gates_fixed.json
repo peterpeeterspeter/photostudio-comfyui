@@ -1,0 +1,135 @@
+{
+  "1": {
+    "inputs": {
+      "image": "test_garment.jpg"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Garment Image"
+    }
+  },
+  "2": {
+    "inputs": {
+      "image": ["1", 0],
+      "threshold": 0.30,
+      "mask_blur": 3,
+      "post_dilate": 8,
+      "output_mode": "both"
+    },
+    "class_type": "RMBGNode",
+    "_meta": {
+      "title": "RMBG Background Removal"
+    }
+  },
+  "3": {
+    "inputs": {
+      "facts_file_path": "test_garment_facts.json"
+    },
+    "class_type": "LoadFactsNode",
+    "_meta": {
+      "title": "Load Light Facts"
+    }
+  },
+  "4": {
+    "inputs": {
+      "facts_json": ["3", 1],
+      "prompt_style": "detailed",
+      "include_constraints": true
+    },
+    "class_type": "PromptFromLightFacts",
+    "_meta": {
+      "title": "Generate Prompt from Facts"
+    }
+  },
+  "5": {
+    "inputs": {
+      "ckpt_name": "sd_xl_base_1.0.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load SDXL Model"
+    }
+  },
+  "6": {
+    "inputs": {
+      "clip": ["5", 1],
+      "text": ["4", 0]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Encode Positive Prompt"
+    }
+  },
+  "7": {
+    "inputs": {
+      "clip": ["5", 1],
+      "text": ["4", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Encode Negative Prompt"
+    }
+  },
+  "8": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Create Empty Latent"
+    }
+  },
+  "9": {
+    "inputs": {
+      "model": ["5", 0],
+      "positive": ["6", 0],
+      "negative": ["7", 0],
+      "latent_image": ["8", 0],
+      "seed": 123456,
+      "steps": 20,
+      "cfg": 7.0,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": 1.0
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Generate Ghost Mannequin"
+    }
+  },
+  "10": {
+    "inputs": {
+      "samples": ["9", 0],
+      "vae": ["5", 2]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode to Image"
+    }
+  },
+  "11": {
+    "inputs": {
+      "image": ["10", 0],
+      "mask": ["2", 1],
+      "ssim_threshold": 0.75,
+      "alpha_threshold": 0.97,
+      "border_width": 8
+    },
+    "class_type": "QualityGateEdge",
+    "_meta": {
+      "title": "Quality Gate: Edge Check"
+    }
+  },
+  "12": {
+    "inputs": {
+      "images": ["10", 0],
+      "filename_prefix": "phase1_5_final_ghost"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Final Ghost Mannequin"
+    }
+  }
+}
