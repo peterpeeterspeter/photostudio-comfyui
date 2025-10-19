@@ -12,7 +12,7 @@ from pathlib import Path
 
 # Configuration
 COMFYUI_SERVER = "http://127.0.0.1:8188"
-WORKFLOW_FILE = "workflows/phase1_5_mvp_working.json" # Back to working MVP
+WORKFLOW_FILE = "workflows/phase1_5_enhanced_mvp_format.json" # Test complete enhanced workflow
 TEST_IMAGE = "input/test_garment.jpg"
 TEST_FACTS = "input/test_garment_facts.json"
 

@@ -308,10 +308,12 @@ def run_batch_validation(output_dir, facts_dir, reference_dir=None):
         print(f"Validating {image_file.name}...")
         
         # Find corresponding facts file
-        facts_file = facts_path / f"{image_file.stem}_facts.json"
+        # Remove trailing underscore if present before matching
+        stem_without_trailing_underscore = image_file.stem.rstrip('_')
+        facts_file = facts_path / f"{stem_without_trailing_underscore}_facts.json"
         if not facts_file.exists():
             # Try alternative naming
-            facts_file = facts_path / f"{image_file.stem}.json"
+            facts_file = facts_path / f"{stem_without_trailing_underscore}.json"
         
         if not facts_file.exists():
             print(f"Warning: No facts file found for {image_file.name}")
