@@ -1,0 +1,67 @@
+{
+  "last_node_id": 4,
+  "last_link_id": 3,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [50, 50],
+      "size": [200, 50],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [1, 2]}
+      ],
+      "properties": {},
+      "widgets_values": ["input/test_garment.jpg"]
+    },
+    {
+      "id": 2,
+      "type": "RMBGNode",
+      "pos": [300, 50],
+      "size": [200, 50],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {"name": "image", "type": "IMAGE", "link": 1}
+      ],
+      "outputs": [
+        {"name": "processed_image", "type": "IMAGE", "links": []},
+        {"name": "mask", "type": "MASK", "links": [3]},
+        {"name": "coverage_ratio", "type": "FLOAT", "links": []}
+      ],
+      "properties": {},
+      "widgets_values": [0.30, 3, 8, "both", "u2net"]
+    },
+    {
+      "id": 3,
+      "type": "MaskEnsemble",
+      "pos": [300, 150],
+      "size": [200, 50],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {"name": "mask1", "type": "MASK", "link": 3},
+        {"name": "mask2", "type": "MASK", "link": 3}
+      ],
+      "outputs": [
+        {"name": "mask", "type": "MASK", "links": []}
+      ],
+      "properties": {},
+      "widgets_values": ["weighted", 0.4, 0.6, 4, 8]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "IMAGE"],
+    [2, 1, 0, 2, 0, "IMAGE"],
+    [3, 2, 1, 3, 0, "MASK"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}
