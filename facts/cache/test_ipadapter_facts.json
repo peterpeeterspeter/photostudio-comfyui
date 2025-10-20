@@ -1,0 +1,52 @@
+{
+  "schema_version": "3.1",
+  "analysis_mode": "full",
+  "garment": {
+    "category": "dress_shirt",
+    "silhouette": "tailored",
+    "fabric": "cotton",
+    "color_hex": "#0000FF",
+    "color_name": "blue",
+    "pattern": "striped",
+    "transparency_level": 0.0,
+    "complexity_score": 0.6,
+    "parts": [
+      {
+        "part_name": "collar",
+        "color_hex": "#0000FF",
+        "texture": "woven",
+        "pattern": "striped",
+        "condition": "clean",
+        "seam_quality": 0.8,
+        "sharpness_needed": 0.9,
+        "transparency": 0.0,
+        "analyzed": true,
+        "analysis_method": "test"
+      },
+      {
+        "part_name": "front body",
+        "color_hex": "#0000FF",
+        "texture": "woven",
+        "pattern": "striped",
+        "condition": "clean",
+        "seam_quality": 0.8,
+        "sharpness_needed": 0.7,
+        "transparency": 0.0,
+        "analyzed": true,
+        "analysis_method": "test"
+      }
+    ]
+  },
+  "photography": {
+    "bg": "pure_white",
+    "lighting": "soft_even_high_key",
+    "frame": "4:5",
+    "coverage_pct": 85
+  },
+  "routing": {
+    "suggested_model": "sdxl",
+    "use_ip_adapter": true,
+    "use_controlnet_inpaint": true
+  },
+  "risk_score": 0.4
+}

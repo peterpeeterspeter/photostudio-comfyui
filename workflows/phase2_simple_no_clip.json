@@ -1,0 +1,141 @@
+{
+  "1": {
+    "inputs": {
+      "image": "test_garment.jpg"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Real Garment Image"
+    }
+  },
+  "2": {
+    "inputs": {
+      "image": ["1", 0],
+      "rmbg_threshold": 0.32,
+      "u2net_threshold": 0.35,
+      "use_human_subtract": true,
+      "mask_blur": 3,
+      "edge_feather": 4
+    },
+    "class_type": "AdvancedGarmentSegmentation",
+    "_meta": {
+      "title": "Advanced Garment Segmentation"
+    }
+  },
+  "3": {
+    "inputs": {
+      "image": ["1", 0],
+      "garment_mask": ["2", 1],
+      "segmentation_mode": "auto",
+      "part_prompts": "collar,left sleeve,right sleeve,front body,hem,placket,pocket",
+      "min_parts_for_dino": 3,
+      "confidence_threshold": 0.5
+    },
+    "class_type": "GarmentPartSegmentation",
+    "_meta": {
+      "title": "Garment Part Segmentation"
+    }
+  },
+  "4": {
+    "inputs": {
+      "parts_json": ["3", 0],
+      "crops_directory": "data/parts",
+      "garment_category": "dress_shirt"
+    },
+    "class_type": "GeminiPartAnalyzer",
+    "_meta": {
+      "title": "Gemini Part Analysis"
+    }
+  },
+  "5": {
+    "inputs": {
+      "ckpt_name": "sd_xl_base_1.0.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load SDXL Model"
+    }
+  },
+  "6": {
+    "inputs": {
+      "facts_json": ["4", 0],
+      "prompt_style": "detailed",
+      "include_constraints": true,
+      "custom_additions": "",
+      "negative_boost": 1.0
+    },
+    "class_type": "PromptFromLightFacts",
+    "_meta": {
+      "title": "Light Facts Prompt Builder"
+    }
+  },
+  "7": {
+    "inputs": {
+      "text": ["6", 0],
+      "clip": ["5", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Encode Positive Prompt"
+    }
+  },
+  "8": {
+    "inputs": {
+      "text": ["6", 1],
+      "clip": ["5", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Encode Negative Prompt"
+    }
+  },
+  "9": {
+    "inputs": {
+      "seed": 42,
+      "steps": 30,
+      "cfg": 8.0,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "normal",
+      "denoise": 1.0,
+      "model": ["5", 0],
+      "positive": ["7", 0],
+      "negative": ["8", 0],
+      "latent_image": ["10", 0]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler (SDXL)"
+    }
+  },
+  "10": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "11": {
+    "inputs": {
+      "samples": ["9", 0],
+      "vae": ["5", 2]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "12": {
+    "inputs": {
+      "images": ["11", 0],
+      "filename_prefix": "phase2_simple_no_clip"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Final Image"
+    }
+  }
+}

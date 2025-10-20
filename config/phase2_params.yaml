@@ -1,0 +1,305 @@
+# Phase 2 Real Garment Processing Configuration
+# Environment: Production-ready real garment processing
+
+# Phase 2 Pipeline Configuration
+phase_2_real_garment:
+  # Advanced Segmentation Settings
+  segmentation:
+    use_advanced: true
+    rmbg_threshold: 0.32
+    u2net_threshold: 0.35
+    subtract_human: true
+    mask_blur: 3
+    edge_feather: 4
+    
+  # Part Segmentation Settings
+  part_segmentation:
+    mode: "auto"  # auto, dino_sam2, atr
+    min_parts_for_dino: 3
+    confidence_threshold: 0.5
+    part_prompts: ["collar", "left sleeve", "right sleeve", "front body", "hem", "placket", "pocket"]
+    
+  # Gemini Analysis Settings
+  gemini_analysis:
+    model: "gemini-1.5-flash-002"
+    retry_attempts: 3
+    cache_results: true
+    cache_dir: "facts/cache"
+    timeout: 30
+    
+  # Model Routing Settings
+  model_routing:
+    use_flux_for_patterns: true
+    use_flux_for_high_risk: true
+    flux_risk_threshold: 0.6
+    flux_complexity_threshold: 0.7
+    flux_transparency_threshold: 0.3
+    
+  # IP-Adapter Settings
+  ip_adapter:
+    enabled: true
+    conditional_on_pattern: true
+    weight: 0.75
+    pattern_threshold: 0.5
+    
+  # Generation Settings
+  generation:
+    default_model: "sdxl"
+    fallback_model: "flux_dev"
+    steps: 30
+    cfg: 8.0
+    sampler: "euler_ancestral"
+    scheduler: "normal"
+    seed_mode: "random"
+    
+  # Quality Validation Settings
+  quality_validation:
+    lpips_threshold: 0.2
+    clip_similarity_threshold: 0.75
+    part_count_validation: true
+    color_consistency_threshold: 0.8
+    analysis_quality_threshold: 0.9
+
+# Server Configuration
+server:
+  host: "0.0.0.0"
+  port: 8188
+  workers: 4
+  timeout: 600
+  max_queue_size: 50
+
+# Resource Management
+resources:
+  # GPU Configuration
+  gpu:
+    memory_management: "auto"  # auto, lowvram, novram
+    device_id: 0
+    max_vram_gb: 24
+    offload_models: true
+    
+  # CPU Configuration  
+  cpu:
+    max_workers: 8
+    thread_limit: 16
+    memory_limit_gb: 32
+    
+  # Storage
+  storage:
+    input_dir: "data/input/real"
+    output_dir: "ComfyUI/output"
+    models_dir: "ComfyUI/models"
+    temp_dir: "data/temp"
+    cleanup_interval_hours: 24
+    max_storage_gb: 500
+
+# Workflow Configuration
+workflow:
+  default_workflow: "phase2_real_garment.json"
+  
+  # Generation Settings
+  generation:
+    default_steps: 30
+    default_cfg: 8.0
+    default_sampler: "euler_ancestral"
+    default_scheduler: "normal"
+    seed_mode: "random"  # random, fixed, increment
+    
+  # Quality Settings
+  quality:
+    min_resolution: [1024, 1024]
+    max_resolution: [2048, 2048]
+    output_format: "PNG"
+    jpeg_quality: 95
+    png_compression: 6
+
+# Batch Processing
+batch:
+  max_concurrent_workflows: 4
+  retry_failed_items: true
+  max_retries: 2
+  progress_update_interval: 10
+  
+  # Reporting
+  reporting:
+    generate_csv: true
+    generate_summary: true
+    save_config_snapshot: true
+    metrics_enabled: true
+
+# Monitoring & Logging
+monitoring:
+  # Logging Configuration
+  logging:
+    level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+    file_path: "output/phase2_comfyui.log"
+    max_file_size_mb: 100
+    backup_count: 10
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    
+  # Metrics
+  metrics:
+    enabled: true
+    endpoint: "/metrics"
+    collection_interval: 30
+    retention_days: 30
+    
+  # Health Checks
+  health_checks:
+    enabled: true
+    interval_seconds: 60
+    endpoints:
+      - "/health"
+      - "/queue"
+      - "/models"
+
+# Security
+security:
+  # API Security
+  api:
+    enable_cors: false
+    allowed_origins: []
+    rate_limiting:
+      enabled: true
+      requests_per_minute: 120
+      burst_size: 20
+      
+  # File Security
+  file_security:
+    max_file_size_mb: 100
+    allowed_extensions: [".jpg", ".jpeg", ".png", ".webp"]
+    scan_uploads: true
+    
+  # Network Security
+  network:
+    bind_localhost_only: false
+    enable_https: false
+    ssl_cert_path: ""
+    ssl_key_path: ""
+
+# Model Configuration
+models:
+  # Required Models
+  required:
+    checkpoint: "sd_xl_base_1.0.safetensors"
+    controlnet: "control_v11p_sd15_canny.pth"
+    
+  # Phase 2 Models
+  phase2:
+    flux_checkpoint: "flux1-dev.safetensors"
+    ip_adapter: "ip-adapter_sdxl.safetensors"
+    
+  # Optional Models
+  optional:
+    vae: "sdxl_vae.safetensors"
+    flux_vae: "flux_vae.safetensors"
+    
+  # Auto-download
+  auto_download:
+    enabled: true
+    verify_integrity: true
+    cleanup_temp_files: true
+    retry_failed_downloads: true
+
+# Integration Settings
+integration:
+  # External APIs
+  apis:
+    gemini_api_key: "${GEMINI_API_KEY}"
+    huggingface_token: "${HF_TOKEN}"
+    webhook_url: "${WEBHOOK_URL}"
+    
+  # Database (if enabled)
+  database:
+    enabled: false
+    connection_string: "${DATABASE_URL}"
+    pool_size: 10
+    timeout: 30
+    
+  # Message Queue (if enabled)  
+  message_queue:
+    enabled: false
+    broker_url: "${REDIS_URL}"
+    result_backend: "${REDIS_URL}"
+    task_timeout: 3600
+
+# Performance Tuning
+performance:
+  # Memory Optimization
+  memory:
+    aggressive_offloading: true
+    model_caching: true
+    clear_cache_interval: 300
+    gc_threshold: 0.8
+    
+  # I/O Optimization
+  io:
+    async_file_operations: true
+    buffer_size_mb: 64
+    concurrent_uploads: 4
+    concurrent_downloads: 2
+    
+  # Processing Optimization
+  processing:
+    parallel_preprocessing: true
+    batch_size_optimization: true
+    pipeline_caching: true
+    fast_preview: false
+
+# Backup & Recovery
+backup:
+  # Configuration Backup
+  config_backup:
+    enabled: true
+    interval_hours: 24
+    retention_days: 30
+    location: "backups/config"
+    
+  # Model Backup
+  model_backup:
+    enabled: false
+    location: "backups/models"
+    compression: true
+    
+  # Output Backup
+  output_backup:
+    enabled: true
+    interval_hours: 6
+    retention_days: 7
+    location: "backups/output"
+    sync_to_s3: false
+    s3_bucket: "${S3_BACKUP_BUCKET}"
+
+# Development & Debug (disabled in production)
+debug:
+  enabled: false
+  detailed_errors: false
+  profiling: false
+  save_intermediate_results: false
+  webhook_debug: false
+
+# Phase 2 Specific Settings
+phase2_specific:
+  # Expected Performance Metrics
+  expected_metrics:
+    qa_pass_rate: 0.90
+    edge_ssim: 0.80
+    color_delta_e: 2.5
+    lpips: 0.2
+    clip_similarity: 0.75
+    part_detection_accuracy: 0.95
+    gemini_analysis_success: 0.90
+    
+  # Performance Targets
+  performance_targets:
+    avg_pipeline_time: 300  # 5 minutes
+    vram_usage_gb: 4.5
+    part_analysis_time: 20  # seconds per part
+    
+  # Acceptance Criteria
+  acceptance_criteria:
+    min_images_tested: 5
+    min_qa_pass_rate: 0.90
+    max_avg_lpips: 0.2
+    min_avg_clip_similarity: 0.75
+    min_part_detection_success: 0.95
+    min_gemini_analysis_success: 0.90

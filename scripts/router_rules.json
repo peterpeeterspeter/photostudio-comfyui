@@ -1,0 +1,54 @@
+{
+  "segmentation_routing": {
+    "use_dino_sam2": {
+      "conditions": [
+        "garment.category in ['asymmetric', 'complex', 'dress']",
+        "garment.pattern != 'solid'",
+        "risk_score > 0.5"
+      ]
+    },
+    "use_atr": {
+      "conditions": [
+        "garment.category in ['t-shirt', 'dress_shirt', 'polo']",
+        "garment.pattern == 'solid'",
+        "risk_score <= 0.5"
+      ]
+    }
+  },
+  "model_routing": {
+    "use_flux_dev": {
+      "conditions": [
+        "garment.pattern != 'solid'",
+        "garment.complexity_score > 0.7",
+        "garment.transparency_level > 0.3",
+        "risk_score > 0.6"
+      ]
+    },
+    "use_sdxl": {
+      "conditions": [
+        "garment.pattern == 'solid'",
+        "garment.complexity_score <= 0.5",
+        "garment.transparency_level <= 0.2",
+        "risk_score <= 0.6"
+      ]
+    }
+  },
+  "ip_adapter_routing": {
+    "enable_ip_adapter": {
+      "conditions": [
+        "garment.pattern != 'solid'",
+        "garment.complexity_score > 0.5",
+        "any(part.pattern != 'solid' for part in garment.parts)"
+      ]
+    }
+  },
+  "controlnet_inpaint_routing": {
+    "enable_controlnet_inpaint": {
+      "conditions": [
+        "garment.complexity_score > 0.3",
+        "any(part.seam_quality < 0.8 for part in garment.parts)",
+        "any(part.sharpness_needed > 0.8 for part in garment.parts)"
+      ]
+    }
+  }
+}

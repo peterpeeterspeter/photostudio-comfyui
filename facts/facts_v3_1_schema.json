@@ -1,0 +1,72 @@
+{
+  "schema_version": "3.1",
+  "analysis_mode": "full",
+  "garment": {
+    "category": "string",
+    "silhouette": "string",
+    "fabric": "string",
+    "color_hex": "#RRGGBB",
+    "color_name": "string",
+    "pattern": "solid|striped|printed|textured",
+    "transparency_level": 0.0,
+    "complexity_score": 0.0,
+    "parts": [
+      {
+        "part_name": "string",
+        "color_hex": "#RRGGBB",
+        "texture": "string",
+        "pattern": "string",
+        "condition": "string",
+        "seam_quality": 0.0,
+        "sharpness_needed": 0.0,
+        "transparency": 0.0,
+        "analyzed": true,
+        "analysis_method": "gemini|fallback",
+        "bbox": [0, 0, 100, 100],
+        "mask_id": "string",
+        "crop_path": "string",
+        "confidence": 0.0
+      }
+    ]
+  },
+  "photography": {
+    "bg": "pure_white",
+    "lighting": "soft_even_high_key",
+    "frame": "4:5",
+    "coverage_pct": 85
+  },
+  "routing": {
+    "suggested_model": "sdxl|flux_dev",
+    "use_ip_adapter": false,
+    "use_controlnet_inpaint": true
+  },
+  "risk_score": 0.0,
+  "segmentation": {
+    "method": "dino_sam2|atr",
+    "parts_detected": 0,
+    "confidence_avg": 0.0
+  },
+  "quality_targets": {
+    "edge_ssim_min": 0.80,
+    "bg_purity_min": 0.95,
+    "color_delta_e_uni_max": 2.5,
+    "color_delta_e_textured_max": 4.0,
+    "lpips_threshold": 0.2,
+    "clip_similarity_threshold": 0.75
+  },
+  "constraints": {
+    "mandatory_features": [
+      "exact_pocket_count",
+      "color_hex_preservation",
+      "part_accuracy"
+    ],
+    "forbidden_elements": [
+      "halo",
+      "fringing",
+      "color_bleed",
+      "extra_seams",
+      "typography_artifacts",
+      "part_misalignment"
+    ]
+  }
+}

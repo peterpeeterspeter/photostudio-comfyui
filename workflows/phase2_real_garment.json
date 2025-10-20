@@ -1,0 +1,292 @@
+{
+  "1": {
+    "inputs": {
+      "image": "test_garment.jpg"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Real Garment Image"
+    }
+  },
+  "2": {
+    "inputs": {
+      "image": ["1", 0],
+      "rmbg_threshold": 0.32,
+      "u2net_threshold": 0.35,
+      "use_human_subtract": true,
+      "mask_blur": 3,
+      "edge_feather": 4
+    },
+    "class_type": "AdvancedGarmentSegmentation",
+    "_meta": {
+      "title": "Advanced Garment Segmentation"
+    }
+  },
+  "3": {
+    "inputs": {
+      "image": ["1", 0],
+      "garment_mask": ["2", 1],
+      "segmentation_mode": "auto",
+      "part_prompts": "collar,left sleeve,right sleeve,front body,hem,placket,pocket",
+      "min_parts_for_dino": 3,
+      "confidence_threshold": 0.5
+    },
+    "class_type": "GarmentPartSegmentation",
+    "_meta": {
+      "title": "Garment Part Segmentation"
+    }
+  },
+  "4": {
+    "inputs": {
+      "parts_json": ["3", 0],
+      "crops_directory": "data/parts",
+      "garment_category": "dress_shirt"
+    },
+    "class_type": "GeminiPartAnalyzer",
+    "_meta": {
+      "title": "Gemini Part Analysis"
+    }
+  },
+  "5": {
+    "inputs": {
+      "facts_json": ["4", 0],
+      "sdxl_model": ["6", 0],
+      "sdxl_vae": ["7", 0],
+      "sdxl_clip": ["8", 0],
+      "flux_model": ["9", 0],
+      "flux_vae": ["10", 0],
+      "flux_clip": ["11", 0],
+      "force_model": ""
+    },
+    "class_type": "ModelRouter",
+    "_meta": {
+      "title": "Model Router (SDXL/FLUX)"
+    }
+  },
+  "6": {
+    "inputs": {
+      "ckpt_name": "sd_xl_base_1.0.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load SDXL Model"
+    }
+  },
+  "7": {
+    "inputs": {
+      "vae_name": "sdxl_vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load SDXL VAE"
+    }
+  },
+  "8": {
+    "inputs": {
+      "clip_name1": "sd_xl_base_1.0.safetensors",
+      "clip_name2": "sd_xl_base_1.0.safetensors"
+    },
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load SDXL CLIP"
+    }
+  },
+  "9": {
+    "inputs": {
+      "ckpt_name": "flux1-dev.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load FLUX Dev Model"
+    }
+  },
+  "10": {
+    "inputs": {
+      "vae_name": "flux_vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    }
+  },
+  "11": {
+    "inputs": {
+      "clip_name1": "flux1-dev.safetensors",
+      "clip_name2": "flux1-dev.safetensors"
+    },
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX CLIP"
+    }
+  },
+  "12": {
+    "inputs": {
+      "conditioning": ["13", 0],
+      "reference_image": ["1", 0],
+      "facts_json": ["4", 0],
+      "adapter_weight": 0.75,
+      "enable_conditioning": true
+    },
+    "class_type": "IPAdapterConditional",
+    "_meta": {
+      "title": "IP-Adapter Conditional"
+    }
+  },
+  "13": {
+    "inputs": {
+      "facts_json": ["4", 0],
+      "prompt_style": "detailed",
+      "include_constraints": true,
+      "custom_additions": "",
+      "negative_boost": 1.0
+    },
+    "class_type": "PromptFromLightFacts",
+    "_meta": {
+      "title": "Light Facts Prompt Builder"
+    }
+  },
+  "14": {
+    "inputs": {
+      "text": ["13", 0],
+      "clip": ["5", 2]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Encode Positive Prompt"
+    }
+  },
+  "15": {
+    "inputs": {
+      "text": ["13", 1],
+      "clip": ["5", 2]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Encode Negative Prompt"
+    }
+  },
+  "16": {
+    "inputs": {
+      "image": ["1", 0],
+      "low_threshold": 100,
+      "high_threshold": 200
+    },
+    "class_type": "CannyEdgePreprocessor",
+    "_meta": {
+      "title": "Canny Edge Detection"
+    }
+  },
+  "17": {
+    "inputs": {
+      "control_net_name": "control_v11p_sd15_canny.pth"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load Canny ControlNet"
+    }
+  },
+  "18": {
+    "inputs": {
+      "conditioning": ["14", 0],
+      "control_net": ["17", 0],
+      "image": ["16", 0],
+      "strength": 0.8
+    },
+    "class_type": "ControlNetApply",
+    "_meta": {
+      "title": "Apply Canny ControlNet"
+    }
+  },
+  "19": {
+    "inputs": {
+      "seed": 42,
+      "steps": 30,
+      "cfg": 8.0,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "normal",
+      "denoise": 1.0,
+      "model": ["5", 0],
+      "positive": ["18", 0],
+      "negative": ["15", 0],
+      "latent_image": ["20", 0]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler (SDXL/FLUX)"
+    }
+  },
+  "20": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "21": {
+    "inputs": {
+      "samples": ["19", 0],
+      "vae": ["5", 1]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "22": {
+    "inputs": {
+      "image": ["21", 0],
+      "mask": ["2", 1],
+      "prompt": ["13", 0],
+      "negative_prompt": ["13", 1],
+      "model": ["5", 0],
+      "vae": ["5", 1],
+      "clip": ["5", 2],
+      "controlnet": ["17", 0],
+      "controlnet_image": ["16", 0],
+      "strength": 0.3,
+      "steps": 15,
+      "cfg": 7.0
+    },
+    "class_type": "ControlNetInpaintPolish",
+    "_meta": {
+      "title": "ControlNet Inpaint Polish"
+    }
+  },
+  "23": {
+    "inputs": {
+      "image": ["22", 0],
+      "edge_threshold": 0.8,
+      "bg_purity_threshold": 0.95
+    },
+    "class_type": "QualityGateEdge",
+    "_meta": {
+      "title": "Quality Gate - Edge"
+    }
+  },
+  "24": {
+    "inputs": {
+      "image": ["23", 3],
+      "mask": ["2", 1],
+      "purity_threshold": 0.95,
+      "color_space": "RGB"
+    },
+    "class_type": "QualityGateBackground",
+    "_meta": {
+      "title": "Quality Gate - Background"
+    }
+  },
+  "25": {
+    "inputs": {
+      "images": ["24", 3],
+      "filename_prefix": "phase2_real_garment"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Final Image"
+    }
+  }
+}

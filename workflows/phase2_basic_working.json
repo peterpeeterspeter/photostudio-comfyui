@@ -1,0 +1,119 @@
+{
+  "1": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "test_garment.jpg",
+      "upload": "image"
+    }
+  },
+  "2": {
+    "class_type": "LoadFactsNode",
+    "inputs": {
+      "facts_file_path": "test_garment_facts.json"
+    }
+  },
+  "3": {
+    "class_type": "AdvancedGarmentSegmentation",
+    "inputs": {
+      "image": ["1", 0],
+      "segmentation_mode": "rmbg_only",
+      "rmbg_threshold": 0.5
+    }
+  },
+  "4": {
+    "class_type": "GarmentPartSegmentation",
+    "inputs": {
+      "image": ["1", 0],
+      "garment_mask": ["3", 1],
+      "segmentation_mode": "dino_sam2",
+      "part_prompts": "collar, sleeve, placket, pocket, hem",
+      "min_parts_for_dino": 2,
+      "confidence_threshold": 0.3
+    }
+  },
+  "5": {
+    "class_type": "GeminiPartAnalyzer",
+    "inputs": {
+      "parts_json": ["4", 0],
+      "analysis_mode": "light",
+      "model_name": "gemini-2.5-flash-lite"
+    }
+  },
+  "6": {
+    "class_type": "PromptBuilder",
+    "inputs": {
+      "facts_description": ["2", 0],
+      "facts_dict": ["2", 1],
+      "ccj_path": "input/test_ccj_controlblock.json"
+    }
+  },
+  "7": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": {
+      "ckpt_name": "sd_xl_base_1.0.safetensors"
+    }
+  },
+  "8": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "clip_l.safetensors",
+      "type": "stable_diffusion"
+    }
+  },
+  "9": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "sdxl_vae.safetensors"
+    }
+  },
+  "10": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": ["6", 0],
+      "clip": ["8", 0]
+    }
+  },
+  "11": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "blurry, low quality, distorted, artifacts",
+      "clip": ["8", 0]
+    }
+  },
+  "12": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 42,
+      "steps": 25,
+      "cfg": 7.5,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": 1.0,
+      "model": ["7", 0],
+      "positive": ["10", 0],
+      "negative": ["11", 0],
+      "latent_image": ["13", 0]
+    }
+  },
+  "13": {
+    "class_type": "VAEEncode",
+    "inputs": {
+      "pixels": ["1", 0],
+      "vae": ["9", 0]
+    }
+  },
+  "14": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": ["12", 0],
+      "vae": ["9", 0]
+    }
+  },
+  "15": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "ghost_mannequin_phase2_basic",
+      "images": ["14", 0]
+    }
+  }
+}

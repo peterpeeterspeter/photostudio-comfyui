@@ -1,0 +1,65 @@
+{
+  "results": [
+    {
+      "image": "ComfyUI/output/phase2_simple_no_clip_00001_.png",
+      "facts": "facts/cache/phase2_simple_no_clip_00001_facts.json",
+      "timestamp": 1760901668.7430832,
+      "lpips_score": 0.15,
+      "clip_similarity": 0.8,
+      "overall_pass": true,
+      "part_count_match": true,
+      "gemini_analysis": {
+        "has_analysis": true,
+        "analysis_quality": 1.0,
+        "analyzed_parts": 2,
+        "total_parts": 2
+      },
+      "color_accuracy": {
+        "color_consistency": 1.0,
+        "dominant_color": "#FFFFFF",
+        "color_variance": 0.0
+      },
+      "schema_version": "3.1",
+      "analysis_mode": "full"
+    },
+    {
+      "image": "ComfyUI/output/phase2_simple_no_clip_00002_.png",
+      "facts": "facts/cache/phase2_simple_no_clip_00002_facts.json",
+      "timestamp": 1760902179.410899,
+      "lpips_score": 0.15,
+      "clip_similarity": 0.8,
+      "overall_pass": true,
+      "part_count_match": true,
+      "gemini_analysis": {
+        "has_analysis": true,
+        "analysis_quality": 1.0,
+        "analyzed_parts": 2,
+        "total_parts": 2
+      },
+      "color_accuracy": {
+        "color_consistency": 1.0,
+        "dominant_color": "#8B4513",
+        "color_variance": 0.5
+      },
+      "schema_version": "3.1",
+      "analysis_mode": "full"
+    }
+  ],
+  "summary": {
+    "total_images": 2,
+    "passed_images": 2,
+    "qa_pass_rate": 1.0,
+    "avg_lpips": 0.15,
+    "avg_clip_similarity": 0.8,
+    "avg_analysis_quality": 1.0,
+    "avg_color_consistency": 1.0,
+    "schema_versions": {
+      "3.1": 2
+    },
+    "phase2_metrics": {
+      "part_detection_success": 1.0,
+      "gemini_analysis_success": 1.0,
+      "color_accuracy_success": 1.0
+    }
+  }
+}

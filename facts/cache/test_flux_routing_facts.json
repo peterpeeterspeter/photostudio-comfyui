@@ -1,0 +1,52 @@
+{
+  "schema_version": "3.1",
+  "analysis_mode": "full",
+  "garment": {
+    "category": "dress",
+    "silhouette": "asymmetric",
+    "fabric": "jacquard",
+    "color_hex": "#8B4513",
+    "color_name": "brown",
+    "pattern": "jacquard",
+    "transparency_level": 0.4,
+    "complexity_score": 0.8,
+    "parts": [
+      {
+        "part_name": "bodice",
+        "color_hex": "#8B4513",
+        "texture": "jacquard",
+        "pattern": "jacquard",
+        "condition": "clean",
+        "seam_quality": 0.9,
+        "sharpness_needed": 0.9,
+        "transparency": 0.4,
+        "analyzed": true,
+        "analysis_method": "test"
+      },
+      {
+        "part_name": "skirt",
+        "color_hex": "#8B4513",
+        "texture": "jacquard",
+        "pattern": "jacquard",
+        "condition": "clean",
+        "seam_quality": 0.9,
+        "sharpness_needed": 0.9,
+        "transparency": 0.4,
+        "analyzed": true,
+        "analysis_method": "test"
+      }
+    ]
+  },
+  "photography": {
+    "bg": "pure_white",
+    "lighting": "soft_even_high_key",
+    "frame": "4:5",
+    "coverage_pct": 90
+  },
+  "routing": {
+    "suggested_model": "flux",
+    "use_ip_adapter": true,
+    "use_controlnet_inpaint": true
+  },
+  "risk_score": 0.7
+}

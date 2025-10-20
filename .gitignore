@@ -72,4 +72,4 @@ Thumbs.db
 
 # Development
 output/
-temp/
+temp/.env

@@ -1,0 +1,59 @@
+{
+  "1": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "test_garment.jpg",
+      "upload": "image"
+    }
+  },
+  "2": {
+    "class_type": "LoadFactsNode",
+    "inputs": {
+      "facts_file_path": "test_garment_facts.json"
+    }
+  },
+  "3": {
+    "class_type": "AdvancedGarmentSegmentation",
+    "inputs": {
+      "image": ["1", 0],
+      "rmbg_threshold": 0.5,
+      "u2net_threshold": 0.35,
+      "use_human_subtract": true,
+      "mask_blur": 3,
+      "edge_feather": 4
+    }
+  },
+  "4": {
+    "class_type": "GarmentPartSegmentation",
+    "inputs": {
+      "image": ["1", 0],
+      "garment_mask": ["3", 1],
+      "segmentation_mode": "dino_sam2",
+      "part_prompts": "collar, sleeve, placket, pocket, hem",
+      "min_parts_for_dino": 2,
+      "confidence_threshold": 0.3
+    }
+  },
+  "5": {
+    "class_type": "GeminiPartAnalyzer",
+    "inputs": {
+      "parts_json": ["4", 0],
+      "analysis_mode": "light",
+      "model_name": "gemini-2.5-flash-lite"
+    }
+  },
+  "6": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "garment_segmentation_test",
+      "images": ["3", 0]
+    }
+  },
+  "7": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "garment_parts_overlay",
+      "images": ["4", 1]
+    }
+  }
+}

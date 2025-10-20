@@ -1,0 +1,191 @@
+{
+  "1": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "test_garment.jpg",
+      "upload": "image"
+    }
+  },
+  "2": {
+    "class_type": "LoadFactsNode",
+    "inputs": {
+      "facts_file": "test_garment_facts.json"
+    }
+  },
+  "3": {
+    "class_type": "AdvancedGarmentSegmentation",
+    "inputs": {
+      "image": ["1", 0],
+      "segmentation_mode": "rmbg_u2net_ensemble",
+      "rmbg_threshold": 0.5,
+      "u2net_threshold": 0.3,
+      "ensemble_method": "weighted_blend",
+      "blend_weight": 0.7
+    }
+  },
+  "4": {
+    "class_type": "GarmentPartSegmentation",
+    "inputs": {
+      "image": ["1", 0],
+      "garment_mask": ["3", 0],
+      "segmentation_mode": "dino_sam2",
+      "part_prompts": "collar, sleeve, placket, pocket, hem",
+      "min_parts_for_dino": 2,
+      "confidence_threshold": 0.3
+    }
+  },
+  "5": {
+    "class_type": "GeminiPartAnalyzer",
+    "inputs": {
+      "image": ["1", 0],
+      "parts_json": ["4", 0],
+      "analysis_mode": "light",
+      "model_name": "gemini-2.5-flash-lite"
+    }
+  },
+  "6": {
+    "class_type": "LightFactsPromptNode",
+    "inputs": {
+      "facts_json": ["2", 0],
+      "parts_analysis": ["5", 0],
+      "prompt_mode": "ghost_mannequin",
+      "style": "professional_photography"
+    }
+  },
+  "7": {
+    "class_type": "ModelRouterNode",
+    "inputs": {
+      "garment_facts": ["2", 0],
+      "suggested_model": "sdxl",
+      "complexity_threshold": 0.6,
+      "pattern_threshold": 0.4
+    }
+  },
+  "8": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": {
+      "ckpt_name": "sd_xl_base_1.0.safetensors"
+    }
+  },
+  "9": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "clip_g.safetensors"
+    }
+  },
+  "10": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "sdxl_vae.safetensors"
+    }
+  },
+  "11": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": ["6", 0],
+      "clip": ["9", 0]
+    }
+  },
+  "12": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "blurry, low quality, distorted, artifacts",
+      "clip": ["9", 0]
+    }
+  },
+  "13": {
+    "class_type": "ControlNetLoader",
+    "inputs": {
+      "control_net_name": "control_v11p_sd15_canny.pth"
+    }
+  },
+  "14": {
+    "class_type": "CannyEdgePreprocessor",
+    "inputs": {
+      "image": ["1", 0],
+      "low_threshold": 50,
+      "high_threshold": 200
+    }
+  },
+  "15": {
+    "class_type": "ControlNetApply",
+    "inputs": {
+      "conditioning": ["11", 0],
+      "control_net": ["13", 0],
+      "image": ["14", 0],
+      "strength": 0.8
+    }
+  },
+  "16": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 42,
+      "steps": 25,
+      "cfg": 7.5,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": 1.0,
+      "model": ["8", 0],
+      "positive": ["15", 0],
+      "negative": ["12", 0],
+      "latent_image": ["17", 0]
+    }
+  },
+  "17": {
+    "class_type": "VAEEncode",
+    "inputs": {
+      "pixels": ["1", 0],
+      "vae": ["10", 0]
+    }
+  },
+  "18": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": ["16", 0],
+      "vae": ["10", 0]
+    }
+  },
+  "19": {
+    "class_type": "QualityGateEdge",
+    "inputs": {
+      "image": ["18", 0],
+      "mask": ["3", 0],
+      "edge_threshold": 0.8,
+      "halo_threshold": 0.1
+    }
+  },
+  "20": {
+    "class_type": "QualityGateBackground",
+    "inputs": {
+      "image": ["18", 0],
+      "mask": ["3", 0],
+      "purity_threshold": 0.95
+    }
+  },
+  "21": {
+    "class_type": "ConditionalSwitchNode",
+    "inputs": {
+      "condition": ["19", 1],
+      "true_value": ["22", 0],
+      "false_value": ["18", 0]
+    }
+  },
+  "22": {
+    "class_type": "SmartInpaintPolishNode",
+    "inputs": {
+      "image": ["18", 0],
+      "mask": ["3", 0],
+      "prompt": "professional ghost mannequin, clean edges, no halos, sharp details",
+      "denoise_strength": 0.3,
+      "dilation_pixels": 5
+    }
+  },
+  "23": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "ghost_mannequin_phase2",
+      "images": ["21", 0]
+    }
+  }
+}

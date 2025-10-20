@@ -1,0 +1,83 @@
+{
+  "1": {
+    "inputs": {
+      "image": "test_garment_001.jpg"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Real Garment Image"
+    }
+  },
+  "2": {
+    "inputs": {
+      "image": ["1", 0],
+      "rmbg_threshold": 0.32,
+      "u2net_threshold": 0.35,
+      "use_human_subtract": true,
+      "mask_blur": 3,
+      "edge_feather": 4
+    },
+    "class_type": "AdvancedGarmentSegmentation",
+    "_meta": {
+      "title": "Advanced Garment Segmentation"
+    }
+  },
+  "3": {
+    "inputs": {
+      "image": ["1", 0],
+      "garment_mask": ["2", 1],
+      "segmentation_mode": "auto",
+      "part_prompts": "collar,left sleeve,right sleeve,front body,hem,placket,pocket",
+      "min_parts_for_dino": 3,
+      "confidence_threshold": 0.5
+    },
+    "class_type": "GarmentPartSegmentation",
+    "_meta": {
+      "title": "Garment Part Segmentation"
+    }
+  },
+  "4": {
+    "inputs": {
+      "parts_json": ["3", 0],
+      "crops_directory": "data/parts",
+      "garment_category": "dress_shirt"
+    },
+    "class_type": "GeminiPartAnalyzer",
+    "_meta": {
+      "title": "Gemini Part Analysis"
+    }
+  },
+  "5": {
+    "inputs": {
+      "facts_json": ["4", 0],
+      "prompt_style": "detailed",
+      "include_constraints": true,
+      "custom_additions": "",
+      "negative_boost": 1.0
+    },
+    "class_type": "PromptFromLightFacts",
+    "_meta": {
+      "title": "Light Facts Prompt Builder"
+    }
+  },
+  "6": {
+    "inputs": {
+      "images": ["2", 0],
+      "filename_prefix": "phase2_core_test"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Garment Segmentation"
+    }
+  },
+  "7": {
+    "inputs": {
+      "images": ["3", 1],
+      "filename_prefix": "phase2_parts_overlay"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Parts Overlay"
+    }
+  }
+}

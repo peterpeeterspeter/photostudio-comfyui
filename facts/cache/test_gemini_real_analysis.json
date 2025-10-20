@@ -1,0 +1,64 @@
+{
+  "schema_version": "3.1",
+  "analysis_mode": "full",
+  "garment": {
+    "category": "dress_shirt",
+    "silhouette": "tailored",
+    "fabric": "cotton",
+    "color_hex": "#FFFFFF",
+    "color_name": "white",
+    "pattern": "solid",
+    "transparency_level": 0.0,
+    "complexity_score": 0.3,
+    "parts": [
+      {
+        "part_name": "collar",
+        "color_hex": "#FFFFFF",
+        "texture": "woven",
+        "pattern": "solid",
+        "condition": "clean",
+        "seam_quality": 0.8,
+        "sharpness_needed": 0.7,
+        "transparency": 0.0,
+        "analyzed": true,
+        "analysis_method": "gemini-fallback"
+      },
+      {
+        "color_hex": "#0000CD",
+        "texture": "woven",
+        "pattern": "solid",
+        "condition": "clean",
+        "seam_quality": 0.9,
+        "sharpness_needed": 0.2,
+        "transparency": 0.0,
+        "part_name": "front body",
+        "analyzed": true,
+        "analysis_method": "gemini-2.5-flash-lite"
+      },
+      {
+        "color_hex": "#020180",
+        "texture": "smooth",
+        "pattern": "solid",
+        "condition": "clean",
+        "seam_quality": 0.9,
+        "sharpness_needed": 0.3,
+        "transparency": 0.0,
+        "part_name": "sleeve",
+        "analyzed": true,
+        "analysis_method": "gemini-2.5-flash-lite"
+      }
+    ]
+  },
+  "photography": {
+    "bg": "pure_white",
+    "lighting": "soft_even_high_key",
+    "frame": "4:5",
+    "coverage_pct": 85
+  },
+  "routing": {
+    "suggested_model": "sdxl",
+    "use_ip_adapter": false,
+    "use_controlnet_inpaint": true
+  },
+  "risk_score": 0.3
+}
