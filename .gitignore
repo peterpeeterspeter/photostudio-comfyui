@@ -73,3 +73,11 @@ Thumbs.db
 # Development
 output/
 temp/.env
+
+# Models and large binaries
+ComfyUI/models/**
+*.safetensors
+*.pt
+*.bin
+ComfyUI/output/**
+.cache/**

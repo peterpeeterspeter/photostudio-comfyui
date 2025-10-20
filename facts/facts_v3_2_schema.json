@@ -1,0 +1,126 @@
+{
+  "schema_version": "3.2",
+  "analysis_mode": "full",
+  "pre_analysis": {
+    "dominant_colors": ["#1A2B3C", "#C8BFC0"],
+    "pattern_complexity": "high|medium|low",
+    "text_detected": true,
+    "text_boxes": [[x1, y1, x2, y2]],
+    "exposure": 0.81,
+    "contrast": 0.65
+  },
+  "garment": {
+    "category": "string",
+    "silhouette": "string",
+    "fabric": "string",
+    "color_hex": "#RRGGBB",
+    "color_name": "string",
+    "pattern": "solid|striped|printed|textured",
+    "transparency_level": 0.0,
+    "complexity_score": 0.0,
+    "semantic_alignment": 0.92,
+    "parts": [
+      {
+        "part_name": "string",
+        "color_hex": "#RRGGBB",
+        "texture": "string",
+        "pattern": "string",
+        "condition": "string",
+        "seam_quality": 0.0,
+        "sharpness_needed": 0.0,
+        "transparency": 0.0,
+        "risk_score": 0.0,
+        "context_alignment": 0.0,
+        "analyzed": true,
+        "analysis_method": "gemini_enhanced|gemini_basic|fallback_enhanced|fallback",
+        "pre_analysis_used": true,
+        "context_features": {
+          "dominant_colors": ["#1A2B3C"],
+          "pattern_complexity": "high",
+          "text_detected": false,
+          "exposure": 0.81,
+          "contrast": 0.65
+        },
+        "bbox": [0, 0, 100, 100],
+        "mask_id": "string",
+        "crop_path": "string",
+        "confidence": 0.0
+      }
+    ]
+  },
+  "segmentation": {
+    "method": "dino_sam2|atr",
+    "parts_detected": 0,
+    "confidence_avg": 0.0,
+    "mask_quality_score": 0.93,
+    "edge_alignment": 0.95,
+    "mask_entropy": 0.90,
+    "stability": 0.94,
+    "mask_weights": {
+      "rmbg": 0.4,
+      "u2net": 0.6
+    }
+  },
+  "photography": {
+    "bg": "pure_white",
+    "lighting": "soft_even_high_key",
+    "frame": "4:5",
+    "coverage_pct": 85
+  },
+  "routing": {
+    "suggested_model": "sdxl|flux_dev",
+    "use_ip_adapter": false,
+    "use_controlnet_inpaint": true
+  },
+  "qa_metrics": {
+    "edge_gate": 0.88,
+    "background_gate": 0.95,
+    "color_fidelity": 0.90,
+    "semantic_alignment": 0.92,
+    "qa_total": 0.91,
+    "weights": {
+      "edge": 0.4,
+      "background": 0.3,
+      "color": 0.2,
+      "semantic": 0.1
+    },
+    "individual_scores": {
+      "edge_weighted": 0.352,
+      "background_weighted": 0.285,
+      "color_weighted": 0.18,
+      "semantic_weighted": 0.092
+    },
+    "pass_threshold": 0.85,
+    "passed": true,
+    "recommendation": "accept|re-render"
+  },
+  "risk_score": 0.0,
+  "quality_targets": {
+    "edge_ssim_min": 0.80,
+    "bg_purity_min": 0.95,
+    "color_delta_e_uni_max": 2.5,
+    "color_delta_e_textured_max": 4.0,
+    "lpips_threshold": 0.2,
+    "clip_similarity_threshold": 0.75,
+    "semantic_alignment_min": 0.9,
+    "mask_quality_min": 0.8
+  },
+  "constraints": {
+    "mandatory_features": [
+      "exact_pocket_count",
+      "color_hex_preservation",
+      "part_accuracy"
+    ],
+    "forbidden_elements": [
+      "halo",
+      "fringing",
+      "color_bleed",
+      "extra_seams",
+      "typography_artifacts",
+      "part_misalignment"
+    ]
+  },
+  "analysis_enhanced": true,
+  "timestamp": "2025-01-20T10:43:00Z",
+  "gemini_available": true
+}

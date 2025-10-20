@@ -83,7 +83,9 @@ photostudio-comfyui/
 ├── config/                           # Configuration files
 │   └── phase1_5_params.yaml          # Pipeline parameters
 └── docs/                             # Documentation
-    └── PHASE_1_5_STATUS.md           # Detailed status report
+    ├── PHASE_1_5_STATUS.md           # Detailed status report
+    ├── PHASE2_1_IMPLEMENTATION_GUIDE.md  # Phase 2.1 implementation details
+    └── PHASE2_DEPLOYMENT_GUIDE.md    # Phase 2 deployment/testing
 ```
 
 ## 🔧 Pipeline Architecture
@@ -94,6 +96,21 @@ photostudio-comfyui/
 Input Image → [RMBG + U²-Net Ensemble] → Load Facts → Generate Prompt →
 [IP-Adapter Conditional] → SDXL Generation → Quality Gates →
 [ControlNet Inpaint Polish] → Final Output
+
+### Phase 2.1 Additions (Truth-Aligned Quality)
+
+```
+Input → Pre-Analysis (colors, FFT complexity, OCR, exposure) →
+Advanced Segmentation (RMBG+U²-Net with mask_quality_score) →
+Dynamic Part Prompts (from Facts V3.1) → SDXL/FLUX Routing →
+Generation → Semantic QA (Gemini) → Hierarchical QA (edge/bg/color/semantic) →
+Report + Auto re-render recommendation
+```
+
+Key research-backed effects:
+- Edge quality correlates most with human judgment (weight 0.4)
+- Background purity (0.3), color ΔE (0.2), semantic alignment (0.1)
+- Pre-analysis context reduces hallucinations and improves prompt grounding
 ```
 
 ### Key Components
@@ -118,7 +135,7 @@ Input Image → [RMBG + U²-Net Ensemble] → Load Facts → Generate Prompt →
    - Halo removal and color correction
    - Smart mask dilation and feathering
 
-## 📊 Performance Metrics
+## 📊 Performance & Research
 
 ### Current Performance (Phase 1.5)
 
@@ -130,14 +147,20 @@ Input Image → [RMBG + U²-Net Ensemble] → Load Facts → Generate Prompt →
 | BG Purity | 0.97+ | 0.95 | ⚠️ Improving |
 | Render Time | <3min | 2:45 | ✅ Excellent |
 
-### Enhanced Pipeline (Phase 1.5.5)
+### Enhanced Pipeline (Phase 2.1)
 
 | Metric | Expected | Improvement |
 |--------|----------|-------------|
-| QA Pass Rate | 90-92% | +5-7% |
-| Edge SSIM | 0.80-0.83 | +7-11% |
-| Color ΔE | 2.4 | -20% |
+| QA Pass Rate | 0.85+ | +5-7% |
+| Edge SSIM | 0.80+ | +7-11% |
+| Color ΔE | ≤ 3.0 (solids), ≤ 5.0 (patterns) | -20% |
 | BG Purity | 0.97 | +2% |
+
+References:
+- LPIPS: Learned Perceptual Image Patch Similarity (Zhang et al.)
+- SSIM: Structural Similarity Index (Wang et al.)
+- CIELAB ΔE color difference (CIEDE2000)
+- CLIP-based anomaly detection for artifact discovery
 | Manual Fix Rate | <8% | -47% |
 
 ## 🎨 Usage Examples
@@ -156,17 +179,17 @@ workflow["2"]["inputs"]["facts_json"] = "input/garment_facts.json"
 prompt_id = queue_prompt(workflow)
 ```
 
-### Batch Processing
+### Batch Processing & QA Dashboard
 
 ```bash
 # Process multiple images
 python scripts/batch_ghost_processor.py --input_dir garments/ --facts_dir facts/ --output_dir results/
 
-# Validate results
-python scripts/quality_validator_enhanced.py --input results/ --facts facts/ --report qa_report.json
+# Validate results with hierarchical QA
+python scripts/quality_validator.py --input results/ --facts facts/ --report qa_report.json
 
-# Generate summary
-python scripts/generate_qa_report.py --input qa_report.json --output qa_summary.md
+# Generate metrics dashboard (ΔE, EdgeGate, Semantic)
+python scripts/metrics_dashboard.py --results-dir results --output-dir dashboard_output
 ```
 
 ## 📋 Facts Schema

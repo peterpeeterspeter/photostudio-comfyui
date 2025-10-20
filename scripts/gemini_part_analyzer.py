@@ -25,6 +25,12 @@ genai.configure(api_key=api_key)
 PART_PROMPT_TEMPLATE = """
 Analyze this {part_name} from a {garment_category}.
 
+Context:
+- Dominant colors detected: {dominant_colors}
+- Pattern complexity: {pattern_complexity}
+- Text present: {text_detected}
+- Exposure level: {exposure}
+
 Identify (JSON only):
 {{
   "color_hex": "#RRGGBB",
@@ -33,28 +39,86 @@ Identify (JSON only):
   "condition": "clean|wrinkled|stained",
   "seam_quality": 0.0-1.0,
   "sharpness_needed": 0.0-1.0,
-  "transparency": 0.0-1.0
+  "transparency": 0.0-1.0,
+  "risk_score": 0.0-1.0
+}}
+"""
+
+ENHANCED_PART_PROMPT_TEMPLATE = """
+Analyze this {part_name} from a {garment_category}.
+
+Pre-analysis Context:
+- Dominant colors detected: {dominant_colors}
+- Pattern complexity: {pattern_complexity}
+- Text present: {text_detected}
+- Exposure level: {exposure}
+- Contrast level: {contrast}
+
+Use this context to improve your analysis accuracy. Consider how the pre-analysis features
+relate to the specific part you're analyzing.
+
+Identify (JSON only):
+{{
+  "color_hex": "#RRGGBB",
+  "texture": "smooth|ribbed|woven|knit",
+  "pattern": "solid|striped|printed|textured",
+  "condition": "clean|wrinkled|stained",
+  "seam_quality": 0.0-1.0,
+  "sharpness_needed": 0.0-1.0,
+  "transparency": 0.0-1.0,
+  "risk_score": 0.0-1.0,
+  "context_alignment": 0.0-1.0
 }}
 """
 
 
-def analyze_garment_part(image_path: str, part_name: str, garment_category: str) -> dict:
+def analyze_garment_part(image_path: str, part_name: str, garment_category: str, 
+                        pre_features: dict = None) -> dict:
     """
     Analyze single garment part using Gemini Flash Lite 2.5
-    Returns structured JSON with per-part attributes
+    Enhanced with pre-analysis context for improved accuracy
+    
+    Args:
+        image_path: Path to the part image
+        part_name: Name of the garment part
+        garment_category: Category of the garment
+        pre_features: Pre-analysis features dict with dominant_colors, pattern_complexity, etc.
+    
+    Returns:
+        dict: Structured JSON with per-part attributes
     """
     if not os.environ.get("GEMINI_API_KEY"):
         print("Warning: GEMINI_API_KEY not found, using fallback analysis")
-        return _fallback_part_analysis(part_name, garment_category)
+        return _fallback_part_analysis(part_name, garment_category, pre_features)
     
     try:
         model = genai.GenerativeModel('gemini-2.5-flash-lite')
         
         image = Image.open(image_path)
-        prompt = PART_PROMPT_TEMPLATE.format(
-            part_name=part_name,
-            garment_category=garment_category
-        )
+        
+        # Use enhanced prompt if pre-analysis features are available
+        if pre_features:
+            prompt = ENHANCED_PART_PROMPT_TEMPLATE.format(
+                part_name=part_name,
+                garment_category=garment_category,
+                dominant_colors=", ".join(pre_features.get("dominant_colors", ["#000000"])),
+                pattern_complexity=pre_features.get("pattern_complexity", "medium"),
+                text_detected=pre_features.get("text_detected", False),
+                exposure=pre_features.get("exposure", 0.5),
+                contrast=pre_features.get("contrast", 0.5)
+            )
+            print(f"Enhanced Gemini analysis for {part_name} with pre-analysis context")
+        else:
+            # Fallback to basic prompt
+            prompt = PART_PROMPT_TEMPLATE.format(
+                part_name=part_name,
+                garment_category=garment_category,
+                dominant_colors="#000000",
+                pattern_complexity="medium",
+                text_detected=False,
+                exposure=0.5
+            )
+            print(f"Basic Gemini analysis for {part_name} (no pre-analysis context)")
         
         response = model.generate_content([prompt, image])
         
@@ -69,17 +133,30 @@ def analyze_garment_part(image_path: str, part_name: str, garment_category: str)
         part_data = json.loads(clean_text)
         part_data["part_name"] = part_name
         part_data["analyzed"] = True
-        part_data["analysis_method"] = "gemini"
+        part_data["analysis_method"] = "gemini_enhanced" if pre_features else "gemini_basic"
+        
+        # Add pre-analysis context info if available
+        if pre_features:
+            part_data["pre_analysis_used"] = True
+            part_data["context_features"] = {
+                "dominant_colors": pre_features.get("dominant_colors", []),
+                "pattern_complexity": pre_features.get("pattern_complexity", "medium"),
+                "text_detected": pre_features.get("text_detected", False),
+                "exposure": pre_features.get("exposure", 0.5),
+                "contrast": pre_features.get("contrast", 0.5)
+            }
+        else:
+            part_data["pre_analysis_used"] = False
         
         print(f"✅ Gemini analysis completed for {part_name}")
         return part_data
         
     except Exception as e:
         print(f"❌ Gemini analysis failed for {part_name}: {e}")
-        return _fallback_part_analysis(part_name, garment_category)
+        return _fallback_part_analysis(part_name, garment_category, pre_features)
 
 
-def _fallback_part_analysis(part_name: str, garment_category: str) -> dict:
+def _fallback_part_analysis(part_name: str, garment_category: str, pre_features: dict = None) -> dict:
     """Fallback analysis when Gemini API is not available"""
     # Provide reasonable defaults based on part type
     defaults = {
@@ -134,13 +211,59 @@ def _fallback_part_analysis(part_name: str, garment_category: str) -> dict:
     fallback_data["analysis_method"] = "fallback"
     fallback_data["error"] = "Gemini API not available"
     
+    # Enhance fallback with pre-analysis context if available
+    if pre_features:
+        fallback_data["pre_analysis_used"] = True
+        fallback_data["analysis_method"] = "fallback_enhanced"
+        
+        # Use dominant color from pre-analysis if available
+        dominant_colors = pre_features.get("dominant_colors", [])
+        if dominant_colors:
+            fallback_data["color_hex"] = dominant_colors[0]  # Use first dominant color
+        
+        # Adjust based on pattern complexity
+        pattern_complexity = pre_features.get("pattern_complexity", "medium")
+        if pattern_complexity == "high":
+            fallback_data["pattern"] = "printed"
+            fallback_data["risk_score"] = 0.7  # Higher risk for complex patterns
+        elif pattern_complexity == "low":
+            fallback_data["pattern"] = "solid"
+            fallback_data["risk_score"] = 0.3  # Lower risk for simple patterns
+        
+        # Adjust based on exposure
+        exposure = pre_features.get("exposure", 0.5)
+        if exposure < 0.3:  # Low exposure
+            fallback_data["condition"] = "dark"
+            fallback_data["sharpness_needed"] = 0.9  # Need more sharpness for dark areas
+        elif exposure > 0.7:  # High exposure
+            fallback_data["condition"] = "bright"
+            fallback_data["transparency"] = 0.2  # Might be overexposed
+        
+        fallback_data["context_features"] = {
+            "dominant_colors": dominant_colors,
+            "pattern_complexity": pattern_complexity,
+            "text_detected": pre_features.get("text_detected", False),
+            "exposure": exposure,
+            "contrast": pre_features.get("contrast", 0.5)
+        }
+    else:
+        fallback_data["pre_analysis_used"] = False
+    
     return fallback_data
 
 
-def batch_analyze_garment(parts_json_path: str, crops_dir: str) -> dict:
+def batch_analyze_garment(parts_json_path: str, crops_dir: str, pre_features: dict = None) -> dict:
     """
     Analyze all parts from segmentation output
-    Returns complete Facts V3.1 JSON
+    Enhanced with pre-analysis context for improved accuracy
+    
+    Args:
+        parts_json_path: Path to parts JSON from segmentation
+        crops_dir: Directory containing cropped part images
+        pre_features: Pre-analysis features dict with dominant_colors, pattern_complexity, etc.
+    
+    Returns:
+        dict: Complete Facts V3.1 JSON with enhanced analysis
     """
     with open(parts_json_path) as f:
         parts = json.load(f)
@@ -152,15 +275,15 @@ def batch_analyze_garment(parts_json_path: str, crops_dir: str) -> dict:
         crop_path = f"{crops_dir}/{parts['sku']}_{part['part_name']}.png"
         
         if os.path.exists(crop_path):
-            analysis = analyze_garment_part(crop_path, part['part_name'], garment_category)
+            analysis = analyze_garment_part(crop_path, part['part_name'], garment_category, pre_features)
             analyzed_parts.append(analysis)
         else:
             print(f"Warning: Crop file not found: {crop_path}")
             # Use fallback analysis
-            analysis = _fallback_part_analysis(part['part_name'], garment_category)
+            analysis = _fallback_part_analysis(part['part_name'], garment_category, pre_features)
             analyzed_parts.append(analysis)
     
-    # Aggregate into Facts V3.1 schema
+    # Aggregate into Facts V3.1 schema (enhanced with pre-analysis)
     facts_v3_1 = {
         "schema_version": "3.1",
         "analysis_mode": "full",
@@ -187,6 +310,21 @@ def batch_analyze_garment(parts_json_path: str, crops_dir: str) -> dict:
         },
         "risk_score": _calculate_risk_score(analyzed_parts)
     }
+    
+    # Add pre-analysis context if available
+    if pre_features:
+        facts_v3_1["pre_analysis"] = {
+            "dominant_colors": pre_features.get("dominant_colors", []),
+            "pattern_complexity": pre_features.get("pattern_complexity", "medium"),
+            "text_detected": pre_features.get("text_detected", False),
+            "text_boxes": pre_features.get("text_boxes", []),
+            "exposure": pre_features.get("exposure", 0.5),
+            "contrast": pre_features.get("contrast", 0.5)
+        }
+        facts_v3_1["analysis_enhanced"] = True
+        print("✅ Facts V3.1 enhanced with pre-analysis context")
+    else:
+        facts_v3_1["analysis_enhanced"] = False
     
     return facts_v3_1
 
